@@ -40,27 +40,6 @@ body {
     /* Cambiado a -3 para estar debajo de todo */
 }
 
-/* Nuevo elemento para los círculos animados */
-#animated-circles {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: -2;
-    /* Entre el fondo y la capa de color */
-    overflow: hidden;
-}
-
-.circle {
-    mix-blend-mode: screen;
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(40px);
-    opacity: 0.6667;
-    animation: float 15s infinite;
-    animation-timing-function: steps(90);
-}
 
 #background::before {
     content: '';
@@ -73,27 +52,6 @@ body {
     z-index: -1;
 }
 
-@keyframes float {
-    0% {
-        transform: translate(0, 0);
-    }
-
-    25% {
-        transform: translate(var(--x1), var(--y1));
-    }
-
-    50% {
-        transform: translate(var(--x2), var(--y2));
-    }
-
-    75% {
-        transform: translate(var(--x3), var(--y3));
-    }
-
-    100% {
-        transform: translate(0, 0);
-    }
-}
 
 .content {
     padding: 1rem;

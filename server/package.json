@@ -1,0 +1,9 @@
+{
+    "name": "obsidian-wallpaper-server",
+    "version": "1.0.0",
+    "description": "Local API server — lee el vault de Obsidian y expone datos para el wallpaper de WE",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    }
+}

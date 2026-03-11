@@ -1,24 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Cal+Sans&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Roboto:wdth,wght@75..100,500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
 
 :root {
-    --background-color: rgba(49, 33, 19, 0.85);
-    --text-color: #cecece;
+  --background-color: rgba(7, 86, 139, 0.85);
+  --text-color: #cecece;
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    /* font-family: 'Cal Sans', 'Roboto', 'Mulish', sans-serif; */
-    /* font-family: 'Cal Sans', 'Roboto', 'Mulish', sans-serif; */
-    font-family: 'Mulish', sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 500;
-    font-style: normal;
-    color: var(--text-color);
-    font-size: 1.2em;
-    line-height: 0.9em;
-    text-shadow: #cecece 0px 0px 10px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "JetBrains Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  color: var(--text-color);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+html {
+  font-size: 1vh;
 }
 
 html,
@@ -30,223 +31,237 @@ body {
 }
 
 #background {
-  background-image: url("data:image/svg+xml,%3C!-- svg: first layer --%3E%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   width: 100%;
   height: 100%;
   position: absolute;
   top: 0;
   left: 0;
   z-index: -3;
-  /* Cambiado a -3 para estar debajo de todo */
 }
-
 
 #background::before {
-    content: '';
-    background: var(--background-color);
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
+  content: "";
+  background: var(--background-color);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
 }
 
+/* Noise overlay — encima de todo */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("noise-light.png");
+  background-repeat: repeat;
+  background-size: 220px 220px;
+  pointer-events: none;
+  z-index: 9999;
+}
 
 .content {
-    padding: 1rem;
-    /* Asegúrate de que el contenido esté por encima de los círculos */
+  padding: 1rem;
+  /* Asegúrate de que el contenido esté por encima de los círculos */
 }
 
 /* Contenedor principal del dashboard */
 .dashboard-container {
-    display: grid;
-    grid-template-columns: 1fr 3fr 1fr; /* Distribución de columnas */
-    grid-gap: 15px;
-    margin: 0 auto;
-    width: 100%;
-    height: calc(100dvh - 40px); /* Altura total menos padding */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* Distribución de columnas */
+  grid-gap: 1rem;
+  margin: 0 auto;
+  width: 100%;
+  height: calc(
+    100dvh - 2.5rem
+  ); /* body padding (0.5rem) + content padding (2rem) */
 }
 
 /* Estilos de los paneles */
 .panel {
-    border-radius: 1rem;
-    border: 3px solid #cecece;
-    box-shadow: 0 0 7px #cecece, 0 0 7px #cecece inset;
-    padding: 1.5rem;
-    margin: 0px;
-    display: flex;
-    flex-direction: column;
+  border-radius: 0.5rem;
+  border: 1px solid #cecece;
+  padding: 1rem;
+  margin: 0px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Panel de tareas */
 .tasks-panel {
-    height: 100%;
+  height: 100%;
 }
 
 .tasks-content {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 
 /* Panel de tracker */
 .tracker-panel {
-    height: 100%;
+  height: 100%;
 }
 
 .tracker-content {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 
-/* Contenedor de widgets */
-.widgets-container {
-    display: grid;
-    grid-template-rows: 1fr 1fr 1fr; /* Distribución de filas para los widgets */
-    grid-gap: 20px;
-    height: 100%;
+/* ── Panel titles ────────────────────────────────────────────── */
+.panel-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
 }
 
-/* Widget común */
-.widget {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.panel-status {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  font-weight: 400;
 }
 
-/* Widget de reloj */
-.clock {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+/* ── Loading ─────────────────────────────────────────────────── */
+.loading-msg {
+  opacity: 0.4;
+  font-size: 0.8rem;
+  font-style: italic;
 }
 
-.clock-face {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 2px solid #333;
-    position: relative;
-    margin-bottom: 10px;
+/* ── Tasks ───────────────────────────────────────────────────── */
+.tasks-content ul {
+  list-style: none;
 }
 
-.clock-hour,
-.clock-minute {
-    position: absolute;
-    background-color: #333;
-    transform-origin: bottom center;
-    top: 50%;
-    left: 50%;
+.tasks-content li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.15rem 0;
 }
 
-.clock-hour {
-    width: 2px;
-    height: 30px;
-    transform: translate(-50%, -100%) rotate(45deg);
+.task-check {
+  min-width: 1rem;
+  color: #7ec8a4;
+  font-size: 0.8rem;
 }
 
-.clock-minute {
-    width: 2px;
-    height: 40px;
-    transform: translate(-50%, -100%) rotate(90deg);
+.task-text {
+  font-size: 0.85rem;
+  line-height: 1.3;
 }
 
-.clock-time {
-    font-size: 1.2rem;
-    margin-top: 5px;
+.task-done .task-check,
+.task-done .task-text {
+  opacity: 0.35;
+  text-decoration: line-through;
 }
 
-/* Widget de calendario */
-.calendar-widget {
-    text-align: center;
+.section-heading {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.06rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.2rem;
 }
 
-.calendar-content {
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    width: 90%;
-    height: 70%;
-    margin: 0 auto;
+/* ── Finance panel ───────────────────────────────────────────── */
+.finance-panel {
+  overflow: hidden;
 }
 
-/* Widget de gráfico */
-.chart {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.finance-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(206, 206, 206, 0.12);
 }
 
-.chart-svg {
-    width: 100%;
-    height: 100%;
+.finance-stat-label {
+  font-size: 0.8rem;
+  opacity: 0.65;
 }
 
-/* Media Queries para Responsive */
-
-/* Tablets */
-@media (max-width: 992px) {
-    .dashboard-container {
-        grid-template-columns: 1fr 1fr; /* Cambiamos a 2 columnas */
-        grid-template-rows: auto auto; /* Añadimos 2 filas */
-        grid-template-areas:
-            'tasks tracker'
-            'widgets widgets'; /* El contenedor de widgets ocupa toda la fila */
-    }
-
-    .tasks-panel {
-        grid-area: tasks;
-    }
-
-    .tracker-panel {
-        grid-area: tracker;
-    }
-
-    .widgets-container {
-        grid-area: widgets;
-        grid-template-columns: repeat(3, 1fr); /* Los widgets en una fila horizontal */
-        grid-template-rows: 1fr;
-    }
+.finance-stat-value {
+  font-size: 0.95rem;
 }
 
-/* Móviles */
-@media (max-width: 768px) {
-    .dashboard-container {
-        grid-template-columns: 1fr; /* Una sola columna */
-        grid-template-areas:
-            'tasks'
-            'tracker'
-            'widgets';
-    }
-
-    .widgets-container {
-        grid-template-columns: 1fr; /* Los widgets apilados */
-        grid-template-rows: repeat(3, auto);
-    }
+.finance-positive {
+  color: #7ec8a4;
+}
+.finance-negative {
+  color: #e07a6e;
 }
 
-/* Dispositivos muy pequeños */
-@media (max-width: 480px) {
-    body {
-        padding: 10px;
-    }
+/* Categorías */
+#finance-categories {
+  margin-top: 0.8rem;
+}
 
-    .dashboard-container {
-        grid-gap: 10px;
-        height: auto; /* Altura automática para dispositivos pequeños */
-    }
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+}
 
-    .panel {
-        padding: 10px;
-    }
+.cat-label {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  min-width: 5.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-    .tasks-panel,
-    .tracker-panel {
-        min-height: 300px; /* Altura mínima para estos paneles */
-    }
+.cat-bar-track {
+  flex: 1;
+  height: 0.25rem;
+  background: rgba(206, 206, 206, 0.15);
+  border-radius: 0.15rem;
+}
 
-    .widget {
-        min-height: 200px; /* Altura mínima para widgets */
-    }
+.cat-bar {
+  height: 100%;
+  background: rgba(206, 206, 206, 0.5);
+  border-radius: 0.15rem;
+}
+
+.cat-amount {
+  font-size: 0.7rem;
+  min-width: 5rem;
+  text-align: right;
+  opacity: 0.8;
+}
+
+/* Transacciones recientes */
+#finance-transactions {
+  margin-top: 0.8rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tx-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.2rem 0;
+  gap: 0.5rem;
+}
+
+.tx-info {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.tx-amount {
+  font-size: 0.75rem;
+  white-space: nowrap;
 }

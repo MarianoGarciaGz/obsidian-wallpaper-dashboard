@@ -14,50 +14,25 @@
         <div class="dashboard-container">
             <!-- Panel de tareas (izquierda) -->
             <div class="panel tasks-panel">
-                <h2>Tasks</h2>
-                <div class="tasks-content">
-                    <!-- Aquí irá el contenido de tareas -->
+                <h2 class="panel-title">Tareas <span class="panel-status" id="tasks-date"></span></h2>
+                <div class="tasks-content" id="tasks-content">
+                    <p class="loading-msg">Cargando...</p>
                 </div>
             </div>
 
             <!-- Panel de tracker (centro) -->
             <div class="panel tracker-panel">
-                <h2>Tracker</h2>
+                <h2 class="panel-title">Tracker</h2>
                 <div class="tracker-content">
-                    <!-- Aquí irá el contenido del tracker -->
                 </div>
             </div>
 
-            <!-- Panel de widgets (derecha) -->
-            <div class="widgets-container">
-                <!-- Widget de reloj -->
-                <div class="panel widget clock-widget">
-                    <div class="clock">
-                        <div class="clock-face">
-                            <div class="clock-hour"></div>
-                            <div class="clock-minute"></div>
-                        </div>
-                        <div class="clock-time">12:00</div>
-                    </div>
-                </div>
-
-                <!-- Widget de calendario -->
-                <div class="panel widget calendar-widget">
-                    <h3>December</h3>
-                    <div class="calendar-content">
-                        <!-- Aquí irá el contenido del calendario -->
-                    </div>
-                </div>
-
-                <!-- Widget de gráfico -->
-                <div class="panel widget chart-widget">
-                    <div class="chart">
-                        <svg viewBox="0 0 300 150" class="chart-svg">
-                            <polyline fill="none" stroke="#000" stroke-width="2"
-                                points="0,150 20,130 40,110 60,140 80,95 100,105 120,80 140,90 160,75 180,65 200,30 220,50 240,40 260,30 280,20 300,10" />
-                        </svg>
-                    </div>
-                </div>
+            <!-- Panel de finanzas (derecha) -->
+            <div class="panel finance-panel">
+                <h2 class="panel-title">Finanzas <span class="panel-status" id="finance-month"></span></h2>
+                <div id="finance-summary"></div>
+                <div id="finance-categories"></div>
+                <div id="finance-transactions"></div>
             </div>
         </div>
 

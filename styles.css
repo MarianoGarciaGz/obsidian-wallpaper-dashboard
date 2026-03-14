@@ -1,8 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
 
 :root {
-  --background-color: rgba(7, 86, 139, 0.85);
-  --text-color: #cecece;
+  --background-color: #18100c;
+  --text-color: #f5efd5;
+  --accent: #ea7d54;
+  --muted: #a7927d;
+  --danger: #f15362;
 }
 
 * {
@@ -14,6 +17,7 @@
   font-weight: 500;
   font-style: normal;
   color: var(--text-color);
+  text-shadow: none;
   font-size: 1rem;
   line-height: 1.4;
 }
@@ -60,6 +64,7 @@ body::after {
   background-size: 220px 220px;
   pointer-events: none;
   z-index: 9999;
+  opacity: 0.25;
 }
 
 .content {
@@ -82,7 +87,7 @@ body::after {
 /* Estilos de los paneles */
 .panel {
   border-radius: 0.5rem;
-  border: 1px solid #cecece;
+  border: 1px solid var(--muted);
   padding: 1rem;
   margin: 0px;
   display: flex;
@@ -143,7 +148,7 @@ body::after {
 
 .task-check {
   min-width: 1rem;
-  color: #7ec8a4;
+  color: var(--accent);
   font-size: 0.8rem;
 }
 
@@ -177,7 +182,7 @@ body::after {
   justify-content: space-between;
   align-items: baseline;
   padding: 0.3rem 0;
-  border-bottom: 1px solid rgba(206, 206, 206, 0.12);
+  border-bottom: 1px solid rgba(167, 146, 125, 0.2);
 }
 
 .finance-stat-label {
@@ -190,10 +195,10 @@ body::after {
 }
 
 .finance-positive {
-  color: #7ec8a4;
+  color: var(--accent);
 }
 .finance-negative {
-  color: #e07a6e;
+  color: var(--danger);
 }
 
 /* Categorías */
@@ -220,13 +225,13 @@ body::after {
 .cat-bar-track {
   flex: 1;
   height: 0.25rem;
-  background: rgba(206, 206, 206, 0.15);
+  background: rgba(167, 146, 125, 0.2);
   border-radius: 0.15rem;
 }
 
 .cat-bar {
   height: 100%;
-  background: rgba(206, 206, 206, 0.5);
+  background: rgba(167, 146, 125, 0.6);
   border-radius: 0.15rem;
 }
 

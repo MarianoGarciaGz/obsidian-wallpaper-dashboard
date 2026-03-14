@@ -15,7 +15,7 @@ window.wallpaperPropertyListener = {
                 return Math.ceil(c * 255)
             })
             var customColorAsCSS = 'rgb(' + customColor + ')'
-            document.getElementById('background').style.backgroundColor = customColorAsCSS
+            document.documentElement.style.setProperty('--background-color', customColorAsCSS)
         }
     }
 }

@@ -265,25 +265,29 @@ function updateClock() {
         const wake = todayWakeUp ?? medianWakeUp
         const bed  = nudgeBedtime
 
+        // Fill % — necesita wake
         if (wake !== null && bed !== null) {
             const total   = bed - wake
             const elapsed = mins < wake ? mins + 1440 - wake : mins - wake
             const pct     = Math.round(Math.min(Math.max(elapsed / total, 0), 1) * 100)
-
             fill.style.setProperty('--fill', pct + '%')
+        } else {
+            const pct = Math.round(((mins % 720) / 720) * 100)
+            fill.style.setProperty('--fill', pct + '%')
+        }
 
-            const remaining = bed - (mins < wake ? mins + 1440 : mins)
+        // Color — solo necesita bed
+        if (bed !== null) {
+            const minsNorm  = mins < 6 * 60 ? mins + 1440 : mins
+            const remaining = bed - minsNorm
             if (remaining <= 0) {
-                fill.style.background = 'var(--color-red, #e05a5a)'
+                fill.style.background = 'var(--danger)'
             } else if (remaining <= 120) {
                 fill.style.background = 'var(--blue-night)'
             } else {
                 fill.style.background = 'var(--muted)'
             }
         } else {
-            // Fallback: ciclo 12h sin datos disponibles
-            const pct = Math.round(((mins % 720) / 720) * 100)
-            fill.style.setProperty('--fill', pct + '%')
             fill.style.background = 'var(--muted)'
         }
     }

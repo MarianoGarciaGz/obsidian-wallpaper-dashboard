@@ -339,6 +339,7 @@ function renderStats(data) {
         if (avg == null || !max) return
         const pct = Math.min(100, Math.round((avg / max) * 100))
         pill.querySelector('.stat-pill-fill').style.setProperty('--fill', pct + '%')
+        pill.querySelector('.stat-pill-pct').textContent = pct + '%'
     })
 }
 

@@ -140,17 +140,29 @@ body::after {
   background: rgba(245, 239, 213, 0.08);
   border-radius: 999px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  display: grid;
 }
 
 .stat-pill-fill {
+  grid-area: 1 / 1;
+  align-self: end;
   width: 100%;
   height: var(--fill, 0%);
   background: var(--c, var(--accent));
   border-radius: 999px;
   transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-pill-pct {
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-color);
+  opacity: 0.7;
+  z-index: 1;
+  letter-spacing: 0.02em;
 }
 
 .stat-pill-label {

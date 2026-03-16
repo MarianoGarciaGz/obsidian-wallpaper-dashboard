@@ -259,22 +259,24 @@ function updateClock() {
     document.getElementById('clock-time').textContent = `${h}:${m}`
 
     // Day progress pill
-    const fill = document.getElementById('clock-day-fill')
+    const fill    = document.getElementById('clock-day-fill')
+    const dayPct  = document.getElementById('clock-day-pct')
     if (fill) {
         const mins = now.getHours() * 60 + now.getMinutes()
         const wake = todayWakeUp ?? medianWakeUp
         const bed  = nudgeBedtime
 
         // Fill % — necesita wake
+        let pct
         if (wake !== null && bed !== null) {
             const total   = bed - wake
             const elapsed = mins < wake ? mins + 1440 - wake : mins - wake
-            const pct     = Math.round(Math.min(Math.max(elapsed / total, 0), 1) * 100)
-            fill.style.setProperty('--fill', pct + '%')
+            pct = Math.round(Math.min(Math.max(elapsed / total, 0), 1) * 100)
         } else {
-            const pct = Math.round(((mins % 720) / 720) * 100)
-            fill.style.setProperty('--fill', pct + '%')
+            pct = Math.round(((mins % 720) / 720) * 100)
         }
+        fill.style.setProperty('--fill', pct + '%')
+        if (dayPct) dayPct.textContent = pct + '%'
 
         // Color — solo necesita bed
         if (bed !== null) {

@@ -155,8 +155,10 @@ function median(arr) {
 // ── Rutas ─────────────────────────────────────────────────────
 
 async function handleStats() {
-    const FIELDS     = ['mood', 'energy', 'focus', 'stress', 'sleep_hours']
-    const MAX_VALUES = { mood: 5, energy: 5, focus: 5, stress: 5, sleep_hours: 10 }
+    const FIELDS         = ['mood', 'energy', 'focus', 'stress', 'sleep_hours']
+    const MAX_VALUES     = { mood: 5, energy: 5, focus: 5, stress: 5, sleep_hours: 100 }
+    const IDEAL_BED_MINS = 1440  // midnight
+    const BED_MAX_DEV    = 180   // 3h tolerance window
 
     const all  = await fs.readdir(JOURNAL_DIR)
     const files = all
@@ -164,10 +166,11 @@ async function handleStats() {
         .sort()
         .slice(-7)
 
-    const sums        = {}
-    const counts      = {}
-    const wakeMinutes = []
-    const bedMinutes  = []
+    const sums           = {}
+    const counts         = {}
+    const wakeMinutes    = []
+    const bedMinutes     = []
+    const sleepDayScores = []
 
     for (const file of files) {
         const content  = await fs.readFile(path.join(JOURNAL_DIR, file), 'utf8')
@@ -182,6 +185,13 @@ async function handleStats() {
         const bMins = parseTimeMinutes(yaml.bedtime, true)
         if (wMins !== null) wakeMinutes.push(wMins)
         if (bMins !== null) bedMinutes.push(bMins)
+        if (wMins !== null && bMins !== null) {
+            const hours       = (wMins + 1440 - bMins) / 60
+            const durScore    = Math.min(hours / 8, 1)
+            const timePenalty = Math.max(0, bMins - IDEAL_BED_MINS) / BED_MAX_DEV
+            const timeScore   = Math.max(0, 1 - timePenalty)
+            sleepDayScores.push(0.6 * durScore + 0.4 * timeScore)
+        }
     }
 
     const averages = {}
@@ -191,7 +201,11 @@ async function handleStats() {
             : null
     }
 
-    const TARGET_BED_MINS = 1440  // 12:00 AM (midnight)
+    if (sleepDayScores.length > 0) {
+        const avg = sleepDayScores.reduce((a, b) => a + b, 0) / sleepDayScores.length
+        averages.sleep_hours = Math.round(avg * 1000) / 10  // 0–100 with 1 decimal
+    }
+
     const medWake = median(wakeMinutes)
     const medBed  = median(bedMinutes)
 
@@ -202,7 +216,7 @@ async function handleStats() {
         medianWakeUp:  medWake,
         medianBedtime: medBed,
         nudgeBedtime: medBed !== null
-            ? (medBed > TARGET_BED_MINS ? medBed - 5 : TARGET_BED_MINS)
+            ? (medBed > IDEAL_BED_MINS ? medBed - 5 : IDEAL_BED_MINS)
             : null,
     }
 }

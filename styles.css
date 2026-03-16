@@ -281,10 +281,14 @@ body::after {
   flex: 4;
   container-type: size;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 1cqh;
   background: rgba(245, 239, 213, 0.06);
   padding: 1rem;
+  cursor: pointer;
+  user-select: none;
 }
 
 .clock-pills {
@@ -327,11 +331,44 @@ body::after {
 }
 
 .clock-time {
-  font-size: min(30cqw, 55cqh);
+  font-size: min(28cqw, 38cqh);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--text-color);
+}
+
+/* ── Pomodoro ────────────────────────────────────────────────── */
+.pomo-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pomo-dot {
+  width: min(2cqw, 3cqh);
+  height: min(2cqw, 3cqh);
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.3;
+  flex-shrink: 0;
+  transition: opacity 0.3s, background 0.3s;
+}
+
+.pomo-countdown {
+  font-size: min(11cqw, 17cqh);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text-color);
+}
+
+.pomo-phase {
+  font-size: min(5cqw, 7cqh);
+  opacity: 0.45;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 /* ── Bitcoin panel ───────────────────────────────────────────── */

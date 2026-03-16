@@ -358,3 +358,65 @@ setInterval(refreshAll, REFRESH_MS)
 loadBTC()
 setInterval(loadBTC, BTC_REFRESH_MS)
 
+// ── Pomodoro ─────────────────────────────────────────────────
+const POMO_SECS  = { work: 25 * 60, short: 5 * 60, long: 15 * 60 }
+const POMO_LABEL = { work: 'Work', short: 'Break', long: 'Long Break' }
+
+let pomoPhase   = 'work'
+let pomoLeft    = POMO_SECS.work
+let pomoRunning = false
+let pomoSession = 0
+let pomoTimer   = null
+
+function pomoTick() {
+    pomoLeft--
+    if (pomoLeft <= 0) {
+        clearInterval(pomoTimer); pomoTimer = null; pomoRunning = false
+        if (pomoPhase === 'work') {
+            pomoSession++
+            pomoPhase = (pomoSession % 4 === 0) ? 'long' : 'short'
+        } else {
+            pomoPhase = 'work'
+        }
+        pomoLeft = POMO_SECS[pomoPhase]
+    }
+    renderPomo()
+}
+
+function pomoToggle() {
+    if (pomoRunning) {
+        clearInterval(pomoTimer); pomoTimer = null; pomoRunning = false
+    } else {
+        pomoTimer = setInterval(pomoTick, 1000); pomoRunning = true
+    }
+    renderPomo()
+}
+
+function pomoReset() {
+    clearInterval(pomoTimer); pomoTimer = null
+    pomoRunning = false; pomoPhase = 'work'
+    pomoLeft = POMO_SECS.work; pomoSession = 0
+    renderPomo()
+}
+
+function renderPomo() {
+    const m = String(Math.floor(pomoLeft / 60)).padStart(2, '0')
+    const s = String(pomoLeft % 60).padStart(2, '0')
+    document.getElementById('pomo-countdown').textContent = `${m}:${s}`
+    document.getElementById('pomo-phase').textContent     = POMO_LABEL[pomoPhase]
+    const dot = document.getElementById('pomo-dot')
+    dot.style.opacity    = pomoRunning ? '1' : '0.3'
+    dot.style.background = pomoPhase === 'work' ? 'var(--accent)' : 'var(--blue-night)'
+    const total    = POMO_SECS[pomoPhase]
+    const pct      = Math.round((1 - pomoLeft / total) * 100)
+    const pomoFill = document.getElementById('clock-pomo-fill')
+    if (pomoFill) pomoFill.style.setProperty('--fill', pct + '%')
+}
+
+document.querySelector('.clock-face').addEventListener('click', pomoToggle)
+document.querySelector('.clock-face').addEventListener('contextmenu', e => {
+    e.preventDefault(); pomoReset()
+})
+
+renderPomo()
+

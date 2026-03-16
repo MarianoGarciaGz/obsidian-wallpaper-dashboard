@@ -413,9 +413,15 @@ function renderPomo() {
     if (pomoFill) pomoFill.style.setProperty('--fill', pct + '%')
 }
 
-document.querySelector('.clock-face').addEventListener('click', pomoToggle)
-document.querySelector('.clock-face').addEventListener('contextmenu', e => {
-    e.preventDefault(); pomoReset()
+let pomoClickTimer = null
+const clockFaceEl  = document.querySelector('.clock-face')
+
+clockFaceEl.addEventListener('click', () => {
+    if (pomoClickTimer) return
+    pomoClickTimer = setTimeout(() => { pomoClickTimer = null; pomoToggle() }, 220)
+})
+clockFaceEl.addEventListener('dblclick', () => {
+    clearTimeout(pomoClickTimer); pomoClickTimer = null; pomoReset()
 })
 
 renderPomo()

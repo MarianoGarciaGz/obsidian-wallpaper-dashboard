@@ -128,7 +128,84 @@ function currentMonth() {
     return `${y}-${m}`
 }
 
+// ── Helpers de tiempo ─────────────────────────────────────────
+// Parsea "11:00 AM" / "2:15 AM" → minutos desde medianoche
+// bedtime con h < 6 → siguiente día (+1440)
+function parseTimeMinutes(str, nextDayIfEarly = false) {
+    if (!str) return null
+    const m = String(str).match(/(\d+):(\d+)\s*(AM|PM)/i)
+    if (!m) return null
+    let h = parseInt(m[1])
+    const min = parseInt(m[2])
+    const period = m[3].toUpperCase()
+    if (period === 'PM' && h !== 12) h += 12
+    if (period === 'AM' && h === 12) h = 0
+    const total = h * 60 + min
+    return (nextDayIfEarly && h < 6) ? total + 1440 : total
+}
+
+// Mediana de un array de números
+function median(arr) {
+    if (!arr.length) return null
+    const s = [...arr].sort((a, b) => a - b)
+    const mid = Math.floor(s.length / 2)
+    return s.length % 2 !== 0 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2)
+}
+
 // ── Rutas ─────────────────────────────────────────────────────
+
+async function handleStats() {
+    const FIELDS     = ['mood', 'energy', 'focus', 'stress', 'sleep_hours']
+    const MAX_VALUES = { mood: 5, energy: 5, focus: 5, stress: 5, sleep_hours: 10 }
+
+    const all  = await fs.readdir(JOURNAL_DIR)
+    const files = all
+        .filter(f => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
+        .sort()
+        .slice(-7)
+
+    const sums        = {}
+    const counts      = {}
+    const wakeMinutes = []
+    const bedMinutes  = []
+
+    for (const file of files) {
+        const content  = await fs.readFile(path.join(JOURNAL_DIR, file), 'utf8')
+        const { yaml } = splitFrontmatter(content)
+        for (const field of FIELDS) {
+            if (typeof yaml[field] === 'number') {
+                sums[field]   = (sums[field]   || 0) + yaml[field]
+                counts[field] = (counts[field] || 0) + 1
+            }
+        }
+        const wMins = parseTimeMinutes(yaml.wake_up, false)
+        const bMins = parseTimeMinutes(yaml.bedtime, true)
+        if (wMins !== null) wakeMinutes.push(wMins)
+        if (bMins !== null) bedMinutes.push(bMins)
+    }
+
+    const averages = {}
+    for (const field of FIELDS) {
+        averages[field] = counts[field]
+            ? Math.round((sums[field] / counts[field]) * 10) / 10
+            : null
+    }
+
+    const TARGET_BED_MINS = 1440  // 12:00 AM (midnight)
+    const medWake = median(wakeMinutes)
+    const medBed  = median(bedMinutes)
+
+    return {
+        days: files.length,
+        averages,
+        max: MAX_VALUES,
+        medianWakeUp:  medWake,
+        medianBedtime: medBed,
+        nudgeBedtime: medBed !== null
+            ? (medBed > TARGET_BED_MINS ? medBed - 5 : TARGET_BED_MINS)
+            : null,
+    }
+}
 
 async function handleToday() {
     const date     = todayISO()
@@ -149,6 +226,7 @@ async function handleToday() {
         date,
         day_of_week: yaml.day_of_week ?? null,
         week_number: yaml.week_number ?? null,
+        wake_up:     yaml.wake_up || null,
         sections,
     }
 }
@@ -235,6 +313,12 @@ const server = http.createServer(async (req, res) => {
     try {
         if (url.pathname === '/api/today') {
             const data = await handleToday()
+            send(200, data)
+            return
+        }
+
+        if (url.pathname === '/api/stats') {
+            const data = await handleStats()
             send(200, data)
             return
         }

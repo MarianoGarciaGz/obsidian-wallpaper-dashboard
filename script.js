@@ -22,6 +22,10 @@ window.wallpaperPropertyListener = {
 
 // ── Obsidian API ──────────────────────────────────────────────
 const API_BASE   = 'http://127.0.0.1:7432'
+
+let medianWakeUp = null   // minutos desde medianoche (mediana 7 días)
+let nudgeBedtime = null   // bedtime target con -5min
+let todayWakeUp  = null   // wake_up real de hoy (si está registrado)
 const REFRESH_MS = 5 * 60 * 1000
 const MXN_FMT    = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' })
 
@@ -39,10 +43,29 @@ async function apiFetch(endpoint) {
     }
 }
 
+// ── Time helper (client) ──────────────────────────────────────
+function parseTimeToMins(str, nextDayIfEarly = false) {
+    if (!str) return null
+    const m = String(str).match(/(\d+):(\d+)\s*(AM|PM)/i)
+    if (!m) return null
+    let h = parseInt(m[1])
+    const min = parseInt(m[2])
+    const period = m[3].toUpperCase()
+    if (period === 'PM' && h !== 12) h += 12
+    if (period === 'AM' && h === 12) h = 0
+    const total = h * 60 + min
+    return (nextDayIfEarly && h < 6) ? total + 1440 : total
+}
+
 // ── Tasks panel ───────────────────────────────────────────────
 async function loadTasks() {
     const data = await apiFetch('/api/today')
-    if (data) renderTasks(data)
+    if (data) {
+        if (data.wake_up) {
+            todayWakeUp = parseTimeToMins(data.wake_up, false)
+        }
+        renderTasks(data)
+    }
 }
 
 function renderTasks(data) {
@@ -192,12 +215,139 @@ function renderFinances(data) {
     transactionsEl.appendChild(txFrag)
 }
 
+// ── Life in Weeks ─────────────────────────────────────────────
+function renderLifeWeeks() {
+    const BIRTH       = new Date('2002-04-04')
+    const TOTAL_YEARS = 90
+    const TOTAL_WEEKS = TOTAL_YEARS * 52
+    const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000
+    const now         = new Date()
+
+    // Año de vida actual (0-indexed), alineado al cumpleaños
+    let yearOfLife = now.getFullYear() - BIRTH.getFullYear()
+    const birthdayThisYear = new Date(now.getFullYear(), BIRTH.getMonth(), BIRTH.getDate())
+    if (now < birthdayThisYear) yearOfLife--
+
+    // Semana dentro del año actual (0-indexed)
+    const yearStart  = new Date(BIRTH.getFullYear() + yearOfLife, BIRTH.getMonth(), BIRTH.getDate())
+    const weekInYear = Math.floor((now - yearStart) / MS_PER_WEEK)
+
+    const currentCell = yearOfLife * 52 + weekInYear
+
+    const grid = document.getElementById('weeks-grid')
+    if (!grid) return
+
+    const frag = document.createDocumentFragment()
+    for (let i = 0; i < TOTAL_WEEKS; i++) {
+        const cell = document.createElement('div')
+        cell.className = 'week-cell'
+        if (i < currentCell)        cell.classList.add('past')
+        else if (i === currentCell) cell.classList.add('current')
+        frag.appendChild(cell)
+    }
+    grid.innerHTML = ''
+    grid.appendChild(frag)
+}
+
+renderLifeWeeks()
+
+// ── Clock ─────────────────────────────────────────────────────
+function updateClock() {
+    const now = new Date()
+    const h   = String(now.getHours()).padStart(2, '0')
+    const m   = String(now.getMinutes()).padStart(2, '0')
+    document.getElementById('clock-time').textContent = `${h}:${m}`
+
+    // Day progress pill
+    const fill = document.getElementById('clock-day-fill')
+    if (fill) {
+        const mins = now.getHours() * 60 + now.getMinutes()
+        const wake = todayWakeUp ?? medianWakeUp
+        const bed  = nudgeBedtime
+
+        if (wake !== null && bed !== null) {
+            const total   = bed - wake
+            const elapsed = mins < wake ? mins + 1440 - wake : mins - wake
+            const pct     = Math.round(Math.min(Math.max(elapsed / total, 0), 1) * 100)
+
+            fill.style.setProperty('--fill', pct + '%')
+
+            const remaining = bed - (mins < wake ? mins + 1440 : mins)
+            if (remaining <= 0) {
+                fill.style.background = 'var(--color-red, #e05a5a)'
+            } else if (remaining <= 120) {
+                fill.style.background = 'var(--blue-night)'
+            } else {
+                fill.style.background = 'var(--muted)'
+            }
+        } else {
+            // Fallback: ciclo 12h sin datos disponibles
+            const pct = Math.round(((mins % 720) / 720) * 100)
+            fill.style.setProperty('--fill', pct + '%')
+            fill.style.background = 'var(--muted)'
+        }
+    }
+}
+
+updateClock()
+setInterval(updateClock, 1000)
+
+// ── Bitcoin price ─────────────────────────────────────────────
+const USD_FMT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+const BTC_REFRESH_MS = 60 * 1000
+
+async function loadBTC() {
+    const controller = new AbortController()
+    const timeout    = setTimeout(() => controller.abort(), 10000)
+    try {
+        const res  = await fetch(
+            'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
+            { signal: controller.signal }
+        )
+        const data = await res.json()
+        const price = data?.bitcoin?.usd
+        if (!price) return
+
+        document.getElementById('btc-price').textContent   = USD_FMT.format(price)
+        document.getElementById('btc-updated').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    } catch {
+        // silently fail — keeps last value on screen
+    } finally {
+        clearTimeout(timeout)
+    }
+}
+
+// ── Stats pills ───────────────────────────────────────────────
+async function loadStats() {
+    const data = await apiFetch('/api/stats')
+    if (data) {
+        medianWakeUp = data.medianWakeUp ?? null
+        nudgeBedtime = data.nudgeBedtime ?? null
+        renderStats(data)
+    }
+}
+
+function renderStats(data) {
+    document.querySelectorAll('.stat-pill').forEach(pill => {
+        const field = pill.dataset.field
+        const avg   = data.averages?.[field]
+        const max   = data.max?.[field]
+        if (avg == null || !max) return
+        const pct = Math.min(100, Math.round((avg / max) * 100))
+        pill.querySelector('.stat-pill-fill').style.setProperty('--fill', pct + '%')
+    })
+}
+
 // ── Polling ───────────────────────────────────────────────────
 function refreshAll() {
     loadTasks()
     loadFinances()
+    loadStats()
 }
 
 refreshAll()
 setInterval(refreshAll, REFRESH_MS)
+
+loadBTC()
+setInterval(loadBTC, BTC_REFRESH_MS)
 

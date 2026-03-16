@@ -1,46 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Layout</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<body id="background">
+  <body id="background">
     <div class="content">
+      <div class="sci-layout">
+        <!-- Top row: 3 equal cards -->
+        <div class="sci-top">
+          <!-- Left: Clock -->
+          <div class="sci-card" id="clock-card">
+            <div class="clock-face">
+              <time class="clock-time" id="clock-time">00:00</time>
+            </div>
+            <div class="clock-pills">
+              <div class="clock-pill-track">
+                <div class="clock-pill-fill" id="clock-day-fill"></div>
+              </div>
+              <div class="clock-pill-track">
+                <div class="clock-pill-fill"></div>
+              </div>
+            </div>
+          </div>
 
-        <div class="dashboard-container">
-            <!-- Panel de tareas (izquierda) -->
-            <div class="panel tasks-panel">
-                <h2 class="panel-title">Tareas <span class="panel-status" id="tasks-date"></span></h2>
-                <div class="tasks-content" id="tasks-content">
-                    <p class="loading-msg">Cargando...</p>
-                </div>
+          <!-- Center: split in 2 -->
+          <div class="sci-top-mid">
+            <div class="sci-card">
+              <h2 class="panel-title">
+                Tasks <span class="panel-status" id="tasks-date"></span>
+              </h2>
+              <div class="tasks-content" id="tasks-content">
+                <p class="loading-msg">Loading...</p>
+              </div>
             </div>
 
-            <!-- Panel de tracker (centro) -->
-            <div class="panel tracker-panel">
-                <h2 class="panel-title">Tracker</h2>
-                <div class="tracker-content">
-                </div>
+            <div class="sci-card">
+              <h2 class="panel-title">
+                Finances <span class="panel-status" id="finance-month"></span>
+              </h2>
+              <div id="finance-summary"></div>
+              <div id="finance-categories"></div>
+              <div id="finance-transactions"></div>
             </div>
+          </div>
 
-            <!-- Panel de finanzas (derecha) -->
-            <div class="panel finance-panel">
-                <h2 class="panel-title">Finanzas <span class="panel-status" id="finance-month"></span></h2>
-                <div id="finance-summary"></div>
-                <div id="finance-categories"></div>
-                <div id="finance-transactions"></div>
-            </div>
+          <!-- Right: Life in Weeks -->
+          <div class="sci-card" id="weeks-card">
+            <div id="weeks-grid"></div>
+          </div>
         </div>
 
-
+        <!-- Bottom row -->
+        <div class="sci-bottom">
+          <div class="sci-stats-bars" id="stats-bars">
+            <div class="stat-pill" data-field="mood">
+              <div class="stat-pill-track">
+                <div class="stat-pill-fill" style="--c: var(--accent)"></div>
+              </div>
+              <span class="stat-pill-label">mood</span>
+            </div>
+            <div class="stat-pill" data-field="energy">
+              <div class="stat-pill-track">
+                <div class="stat-pill-fill" style="--c: #c4a45a"></div>
+              </div>
+              <span class="stat-pill-label">energy</span>
+            </div>
+            <div class="stat-pill" data-field="focus">
+              <div class="stat-pill-track">
+                <div
+                  class="stat-pill-fill"
+                  style="--c: var(--text-color)"
+                ></div>
+              </div>
+              <span class="stat-pill-label">focus</span>
+            </div>
+            <div class="stat-pill" data-field="stress">
+              <div class="stat-pill-track">
+                <div class="stat-pill-fill" style="--c: var(--danger)"></div>
+              </div>
+              <span class="stat-pill-label">stress</span>
+            </div>
+            <div class="stat-pill" data-field="sleep_hours">
+              <div class="stat-pill-track">
+                <div class="stat-pill-fill" style="--c: var(--muted)"></div>
+              </div>
+              <span class="stat-pill-label">sleep</span>
+            </div>
+          </div>
+          <div class="sci-card"></div>
+          <div class="sci-card" id="btc-panel">
+            <span class="btc-label">BTC / USD</span>
+            <span class="btc-price" id="btc-price">—</span>
+            <span class="btc-updated" id="btc-updated"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="script.js"></script>
-
-</body>
-
+  </body>
 </html>

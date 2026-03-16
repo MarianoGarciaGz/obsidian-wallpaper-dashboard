@@ -3,6 +3,7 @@
 :root {
   --background-color: #18100c;
   --text-color: #f5efd5;
+  --blue-night: #7371e6;
   --accent: #ea7d54;
   --muted: #a7927d;
   --danger: #f15362;
@@ -69,47 +70,130 @@ body::after {
 
 .content {
   padding: 1rem;
-  /* Asegúrate de que el contenido esté por encima de los círculos */
-}
-
-/* Contenedor principal del dashboard */
-.dashboard-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr; /* Distribución de columnas */
-  grid-gap: 1rem;
-  margin: 0 auto;
-  width: 100%;
-  height: calc(
-    100dvh - 2.5rem
-  ); /* body padding (0.5rem) + content padding (2rem) */
-}
-
-/* Estilos de los paneles */
-.panel {
-  border-radius: 0.5rem;
-  border: 1px solid var(--muted);
-  padding: 1rem;
-  margin: 0px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Panel de tareas */
-.tasks-panel {
   height: 100%;
 }
 
 .tasks-content {
-  flex-grow: 1;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Panel de tracker */
-.tracker-panel {
+/* ── Sci-fi layout ───────────────────────────────────────────── */
+.sci-layout {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  gap: 0.4rem;
 }
 
-.tracker-content {
-  flex-grow: 1;
+.sci-card {
+  background: rgba(245, 239, 213, 0.06);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.sci-top-mid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  min-height: 0;
+}
+
+/* Fila superior */
+.sci-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+/* Fila inferior */
+.sci-bottom {
+  display: grid;
+  grid-template-columns: 1fr 4fr 3fr;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.sci-stats-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.stat-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stat-pill-track {
+  flex: 1;
+  width: 100%;
+  background: rgba(245, 239, 213, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.stat-pill-fill {
+  width: 100%;
+  height: var(--fill, 0%);
+  background: var(--c, var(--accent));
+  border-radius: 999px;
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-pill-label {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+}
+
+/* ── Life in Weeks ───────────────────────────────────────────── */
+#weeks-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+#weeks-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(52, 1fr);
+  grid-template-rows: repeat(90, 1fr);
+  gap: 0.07rem;
+}
+
+.week-cell {
+  background: rgba(245, 239, 213, 0.08);
+}
+
+.week-cell.past {
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.week-cell.current {
+  background: var(--accent);
+}
+
+.sci-data-c {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  height: 2.2rem;
+  flex-shrink: 0;
 }
 
 /* ── Panel titles ────────────────────────────────────────────── */
@@ -170,6 +254,85 @@ body::after {
   letter-spacing: 0.06rem;
   margin-top: 0.75rem;
   margin-bottom: 0.2rem;
+}
+
+/* ── Clock ───────────────────────────────────────────────────── */
+#clock-card {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.clock-face {
+  flex: 4;
+  container-type: size;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(245, 239, 213, 0.06);
+  padding: 1rem;
+}
+
+.clock-pills {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.3rem;
+}
+
+.clock-pill-track {
+  flex: 1;
+  background: rgba(245, 239, 213, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.clock-pill-fill {
+  width: 100%;
+  height: var(--fill, 0%);
+  background: var(--muted);
+  border-radius: 999px;
+  transition: height 1s linear;
+}
+
+.clock-time {
+  font-size: min(30cqw, 55cqh);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text-color);
+}
+
+/* ── Bitcoin panel ───────────────────────────────────────────── */
+#btc-panel {
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.btc-label {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+}
+
+.btc-price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.btc-updated {
+  font-size: 0.65rem;
+  opacity: 0.35;
 }
 
 /* ── Finance panel ───────────────────────────────────────────── */

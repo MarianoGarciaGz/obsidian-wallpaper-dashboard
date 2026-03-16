@@ -18,20 +18,18 @@ El usuario usa una pantalla **DQHD (5120×1440)**. Todo el sizing debe escalar c
 - `100vw` / `100vh` = píxeles reales de la pantalla.
 - El wallpaper siempre es fullscreen, nunca cambia de tamaño → las media queries no tienen utilidad aquí.
 
-## Unidades y sizing
-
-- `html { font-size: 1vh }` → `1rem = 1vh`. En DQHD y QHD (ambas 1440px de alto): `1rem = 14.4px`.
-- Usar `rem` para todo lo que deba escalar (padding, gap, border-radius, font-size).
-- Evitar `px` para layout. Evitar `vw` como base de font-size (en pantallas ultrawide como DQHD, `1vw = 51.2px`).
-- La altura del dashboard se calcula como `calc(100dvh - 2.5rem)` para descontar los paddings de `body` (0.5rem) y `.content` (2rem).
-
 ## Wallpaper Engine API
 
 `window.wallpaperPropertyListener` expone callbacks para recibir propiedades configuradas por el usuario en WE:
+
 - `applyUserProperties`: recibe propiedades custom del `project.json` (e.g. `customcolor`).
 - `applyGeneralProperties`: recibe propiedades generales del motor (e.g. `fps`).
 
 Los colores en WE llegan como string `"R G B"` con valores `0–1`, hay que convertirlos a `0–255` para CSS.
+
+## Idioma del contenido
+
+Todo el contenido visible en el wallpaper (labels, títulos de paneles, placeholders) debe estar en **inglés**.
 
 ## Estructura
 

@@ -411,6 +411,8 @@ function renderPomo() {
     const pct      = Math.round((1 - pomoLeft / total) * 100)
     const pomoFill = document.getElementById('clock-pomo-fill')
     if (pomoFill) pomoFill.style.setProperty('--fill', pct + '%')
+    const pomoPct = document.getElementById('clock-pomo-pct')
+    if (pomoPct) pomoPct.textContent = pct + '%'
 }
 
 let pomoClickTimer = null

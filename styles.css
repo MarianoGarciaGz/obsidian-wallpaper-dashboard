@@ -171,7 +171,7 @@ body::after {
   justify-self: center;
   font-size: 1rem;
   line-height: 1;
-  padding-bottom: 0.2rem;
+  padding-bottom: 0.5rem;
   z-index: 2;
   opacity: 0.6;
   color: var(--text-color);

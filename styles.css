@@ -169,10 +169,12 @@ body::after {
   grid-area: 1 / 1;
   align-self: end;
   justify-self: center;
-  font-size: 0.7rem;
+  font-size: 1rem;
   line-height: 1;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.2rem;
   z-index: 2;
+  opacity: 0.6;
+  color: var(--text-color);
 }
 
 .stat-pill-label {

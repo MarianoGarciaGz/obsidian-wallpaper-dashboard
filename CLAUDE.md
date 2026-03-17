@@ -31,6 +31,16 @@ Los colores en WE llegan como string `"R G B"` con valores `0–1`, hay que conv
 
 Todo el contenido visible en el wallpaper (labels, títulos de paneles, placeholders) debe estar en **inglés**.
 
+## Servidor local (API)
+
+El wallpaper consume una API REST local en `http://127.0.0.1:7432` servida por `server/index.js` (Node.js).
+
+El servidor se lanza automáticamente al iniciar Windows via `server/start.vbs`, que está en la carpeta `shell:startup`. Corre en background sin ventana visible.
+
+**Para reiniciar tras cambios en `server/index.js`:**
+1. Matar el proceso: `taskkill /F /IM node.exe` en terminal (o Task Manager → node.exe → End Task)
+2. Relanzar: doble click en `server/start.vbs` o `wscript "...server\start.vbs"` en terminal
+
 ## Estructura
 
 - `index.html` — markup del dashboard (3 columnas: tasks, tracker, panel derecho)

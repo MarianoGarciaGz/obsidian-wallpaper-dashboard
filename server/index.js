@@ -155,8 +155,8 @@ function median(arr) {
 // ── Rutas ─────────────────────────────────────────────────────
 
 async function handleStats() {
-    const FIELDS         = ['mood', 'energy', 'focus', 'stress', 'sleep_hours']
-    const MAX_VALUES     = { mood: 5, energy: 5, focus: 5, stress: 5, sleep_hours: 100 }
+    const FIELDS         = ['mood', 'energy', 'focus', 'stress', 'exercise']
+    const MAX_VALUES     = { mood: 5, energy: 5, focus: 5, stress: 5, exercise: 1 }
     const IDEAL_BED_MINS = 1440  // midnight
     const BED_MAX_DEV    = 180   // 3h tolerance window
 

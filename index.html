@@ -14,6 +14,7 @@
         <div class="sci-top">
           <!-- Left: Clock -->
           <div class="sci-card" id="clock-card">
+            <!-- Clock Face -->
             <div class="clock-face">
               <time class="clock-time" id="clock-time">00:00</time>
               <div class="pomo-display">
@@ -23,10 +24,12 @@
               </div>
             </div>
             <div class="clock-pills">
+              <!-- Pomodoro Pill Stat -->
               <div class="clock-pill-track">
                 <div class="clock-pill-fill" id="clock-pomo-fill"></div>
                 <span class="clock-pill-pct" id="clock-pomo-pct"></span>
               </div>
+              <!-- Day Pill Stat -->
               <div class="clock-pill-track">
                 <div class="clock-pill-fill" id="clock-day-fill"></div>
                 <span class="clock-pill-pct" id="clock-day-pct"></span>
@@ -64,12 +67,12 @@
         <!-- Bottom row -->
         <div class="sci-bottom">
           <div class="sci-stats-bars" id="stats-bars">
-            <div class="stat-pill" data-field="mood">
+            <div class="stat-pill" data-field="exercise">
               <div class="stat-pill-track">
                 <div class="stat-pill-fill" style="--c: var(--accent)"></div>
                 <span class="stat-pill-pct"></span>
               </div>
-              <span class="stat-pill-label">mood</span>
+              <span class="stat-pill-label">exercise</span>
             </div>
             <div class="stat-pill" data-field="energy">
               <div class="stat-pill-track">
@@ -78,15 +81,12 @@
               </div>
               <span class="stat-pill-label">energy</span>
             </div>
-            <div class="stat-pill" data-field="focus">
+            <div class="stat-pill" data-field="mood">
               <div class="stat-pill-track">
-                <div
-                  class="stat-pill-fill"
-                  style="--c: var(--text-color)"
-                ></div>
+                <div class="stat-pill-fill" style="--c: var(--blue-night)"></div>
                 <span class="stat-pill-pct"></span>
               </div>
-              <span class="stat-pill-label">focus</span>
+              <span class="stat-pill-label">mood</span>
             </div>
             <div class="stat-pill" data-field="stress">
               <div class="stat-pill-track">
@@ -95,12 +95,12 @@
               </div>
               <span class="stat-pill-label">stress</span>
             </div>
-            <div class="stat-pill" data-field="sleep_hours">
+            <div class="stat-pill" data-field="focus">
               <div class="stat-pill-track">
-                <div class="stat-pill-fill" style="--c: var(--muted)"></div>
+                <div class="stat-pill-fill" style="--c: var(--text-color)"></div>
                 <span class="stat-pill-pct"></span>
               </div>
-              <span class="stat-pill-label">sleep</span>
+              <span class="stat-pill-label">focus</span>
             </div>
           </div>
           <div class="sci-card"></div>

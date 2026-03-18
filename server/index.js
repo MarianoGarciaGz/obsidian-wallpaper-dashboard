@@ -207,7 +207,7 @@ async function handleStats() {
   if (sleepDayScores.length > 0) {
     const avg =
       sleepDayScores.reduce((a, b) => a + b, 0) / sleepDayScores.length;
-    averages.sleep_hours = Math.round(avg * 1000) / 10; // 0–100 with 1 decimal
+    averages.sleep_score = Math.round(avg * 1000) / 10; // 0–100 with 1 decimal
   }
 
   const medWake = median(wakeMinutes);

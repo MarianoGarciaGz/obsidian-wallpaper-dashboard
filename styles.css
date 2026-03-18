@@ -55,7 +55,6 @@ body {
   z-index: -1;
 }
 
-/* Noise overlay — encima de todo */
 body::after {
   content: "";
   position: fixed;
@@ -73,13 +72,7 @@ body::after {
   height: 100%;
 }
 
-.tasks-content {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* ── Sci-fi layout ───────────────────────────────────────────── */
+/* ── Layout ─────────────────────────────────────────────────── */
 .sci-layout {
   display: flex;
   flex-direction: column;
@@ -87,13 +80,24 @@ body::after {
   gap: 0.4rem;
 }
 
-.sci-card {
+.card-bg {
   background: rgba(245, 239, 213, 0.06);
+}
+
+.sci-card {
   display: flex;
   flex-direction: column;
   padding: 1rem;
   overflow: hidden;
   min-height: 0;
+}
+
+.sci-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 0.4rem;
+  flex: 1;
 }
 
 .sci-top-mid {
@@ -103,16 +107,6 @@ body::after {
   min-height: 0;
 }
 
-/* Fila superior */
-.sci-top {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr;
-  gap: 0.4rem;
-  flex: 1;
-}
-
-/* Fila inferior */
 .sci-bottom {
   display: grid;
   grid-template-columns: 1fr 4fr 3fr;
@@ -120,40 +114,26 @@ body::after {
   flex: 1;
 }
 
-.sci-stats-bars {
-  display: flex;
-  align-items: stretch;
-  gap: 0.5rem;
-}
-
-.stat-pill {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.stat-pill-track {
-  flex: 1;
-  width: 100%;
+/* ── Shared pill system ────────────────────────────────────── */
+.pill-track {
   background: rgba(245, 239, 213, 0.08);
   border-radius: 999px;
   overflow: hidden;
   display: grid;
+  flex: 1;
 }
 
-.stat-pill-fill {
+.pill-fill {
   grid-area: 1 / 1;
   align-self: end;
   width: 100%;
   height: var(--fill, 0%);
-  background: var(--c, var(--accent));
+  background: var(--c, var(--muted));
   border-radius: 999px;
   transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stat-pill-pct {
+.pill-pct {
   grid-area: 1 / 1;
   align-self: center;
   justify-self: center;
@@ -177,47 +157,141 @@ body::after {
   color: var(--text-color);
 }
 
-.stat-pill-label {
-  font-size: 0.65rem;
-  opacity: 0.5;
+/* ── Stat pills (bottom-left) ──────────────────────────────── */
+.sci-stats-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.stat-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stat-pill .pill-track {
+  width: 100%;
+}
+
+.stat-pill .pill-fill {
+  background: var(--c, var(--accent));
+}
+
+/* ── Clock ───────────────────────────────────────────────────── */
+#clock-card {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.clock-face {
+  flex: 4;
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1cqh;
+  background: rgba(245, 239, 213, 0.06);
+  padding: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.clock-pills {
+  padding-left: 0.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.3rem;
+}
+
+.clock-pills .pill-fill {
+  transition-timing-function: linear;
+}
+
+.clock-time {
+  font-size: min(28cqw, 38cqh);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text-color);
+}
+
+/* ── Pomodoro ────────────────────────────────────────────────── */
+.pomo-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pomo-dot {
+  width: min(2cqw, 3cqh);
+  height: min(2cqw, 3cqh);
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.3;
+  flex-shrink: 0;
+  transition:
+    opacity 0.3s,
+    background 0.3s;
+}
+
+.pomo-countdown {
+  font-size: min(11cqw, 17cqh);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text-color);
+}
+
+.pomo-phase {
+  font-size: min(5cqw, 7cqh);
+  opacity: 0.45;
   text-transform: uppercase;
-  letter-spacing: 0.05rem;
+  letter-spacing: 0.06em;
 }
 
 /* ── Life in Weeks ───────────────────────────────────────────── */
 #weeks-card {
   padding: 0;
   overflow: hidden;
+  flex-direction: row;
+  gap: 0.4rem;
+}
+
+.weeks-left {
+  flex: 1;
+}
+
+.weeks-right {
+  aspect-ratio: 622 / 1078;
+  overflow: hidden;
 }
 
 #weeks-grid {
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-template-columns: repeat(52, 1fr);
-  grid-template-rows: repeat(90, 1fr);
-  gap: 0.07rem;
 }
 
-.week-cell {
-  background: rgba(245, 239, 213, 0.08);
+#weeks-grid rect {
+  fill: rgba(245, 239, 213, 0.08);
 }
 
-.week-cell.past {
-  background: var(--muted);
+#weeks-grid rect.past {
+  fill: var(--text-color);
   opacity: 0.6;
 }
 
-.week-cell.current {
-  background: var(--accent);
-}
-
-.sci-data-c {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.4rem;
-  height: 2.2rem;
-  flex-shrink: 0;
+#weeks-grid rect.current {
+  fill: var(--accent);
 }
 
 /* ── Panel titles ────────────────────────────────────────────── */
@@ -235,7 +309,6 @@ body::after {
   font-weight: 400;
 }
 
-/* ── Loading ─────────────────────────────────────────────────── */
 .loading-msg {
   opacity: 0.4;
   font-size: 0.8rem;
@@ -243,6 +316,12 @@ body::after {
 }
 
 /* ── Tasks ───────────────────────────────────────────────────── */
+.tasks-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .tasks-content ul {
   list-style: none;
 }
@@ -280,109 +359,6 @@ body::after {
   margin-bottom: 0.2rem;
 }
 
-/* ── Clock ───────────────────────────────────────────────────── */
-#clock-card {
-  flex-direction: row;
-  align-items: stretch;
-  gap: 0;
-  background: transparent;
-  padding: 0;
-}
-
-.clock-face {
-  flex: 4;
-  container-type: size;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1cqh;
-  background: rgba(245, 239, 213, 0.06);
-  padding: 1rem;
-  cursor: pointer;
-  user-select: none;
-}
-
-.clock-pills {
-  padding-left: 0.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: 0.3rem;
-}
-
-.clock-pill-track {
-  flex: 1;
-  background: rgba(245, 239, 213, 0.08);
-  border-radius: 999px;
-  overflow: hidden;
-  display: grid;
-}
-
-.clock-pill-fill {
-  grid-area: 1 / 1;
-  align-self: end;
-  width: 100%;
-  height: var(--fill, 0%);
-  background: var(--muted);
-  border-radius: 999px;
-  transition: height 1s linear;
-}
-
-.clock-pill-pct {
-  grid-area: 1 / 1;
-  align-self: center;
-  justify-self: center;
-  font-size: 0.55rem;
-  font-weight: 700;
-  color: var(--text-color);
-  opacity: 0.7;
-  z-index: 1;
-  letter-spacing: 0.02em;
-}
-
-.clock-time {
-  font-size: min(28cqw, 38cqh);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--text-color);
-}
-
-/* ── Pomodoro ────────────────────────────────────────────────── */
-.pomo-display {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.pomo-dot {
-  width: min(2cqw, 3cqh);
-  height: min(2cqw, 3cqh);
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.3;
-  flex-shrink: 0;
-  transition: opacity 0.3s, background 0.3s;
-}
-
-.pomo-countdown {
-  font-size: min(11cqw, 17cqh);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--text-color);
-}
-
-.pomo-phase {
-  font-size: min(5cqw, 7cqh);
-  opacity: 0.45;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
 /* ── Bitcoin panel ───────────────────────────────────────────── */
 #btc-panel {
   justify-content: center;
@@ -409,10 +385,6 @@ body::after {
 }
 
 /* ── Finance panel ───────────────────────────────────────────── */
-.finance-panel {
-  overflow: hidden;
-}
-
 .finance-stat {
   display: flex;
   justify-content: space-between;
@@ -437,7 +409,6 @@ body::after {
   color: var(--danger);
 }
 
-/* Categorías */
 #finance-categories {
   margin-top: 0.8rem;
 }
@@ -478,7 +449,6 @@ body::after {
   opacity: 0.8;
 }
 
-/* Transacciones recientes */
 #finance-transactions {
   margin-top: 0.8rem;
   flex: 1;

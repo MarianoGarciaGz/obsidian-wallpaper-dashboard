@@ -1,358 +1,365 @@
-const http = require('http')
-const fs   = require('fs/promises')
-const path = require('path')
-const { URL } = require('url')
+const http = require("http");
+const fs = require("fs/promises");
+const path = require("path");
+const { URL } = require("url");
 
 // ── Configuración ─────────────────────────────────────────────
-const VAULT_PATH  = 'C:\\Users\\maria\\Brain'
-const JOURNAL_DIR = path.join(VAULT_PATH, 'areas', 'Personal', 'Journal')
-const FINANCE_DIR = path.join(VAULT_PATH, 'areas', 'Finances', 'transactions')
-const PORT        = 7432
+const VAULT_PATH = "C:\\Users\\maria\\Brain";
+const JOURNAL_DIR = path.join(VAULT_PATH, "areas", "Personal", "Journal");
+const FINANCE_DIR = path.join(VAULT_PATH, "areas", "Finances", "transactions");
+const PORT = 7432;
 
 // ── YAML frontmatter parser ───────────────────────────────────
 // Lee líneas entre los dos `---` del inicio del archivo.
 // Soporta strings, números, booleanos y listas simples.
 function parseYAML(content) {
-    const lines  = content.split('\n')
-    const result = {}
+  const lines = content.split("\n");
+  const result = {};
 
-    if (lines[0].trim() !== '---') return result
+  if (lines[0].trim() !== "---") return result;
 
-    let i = 1
-    let lastKey = null
+  let i = 1;
+  let lastKey = null;
 
-    while (i < lines.length && lines[i].trim() !== '---') {
-        const line = lines[i]
+  while (i < lines.length && lines[i].trim() !== "---") {
+    const line = lines[i];
 
-        // Item de lista: "  - valor"
-        if (/^\s+-\s*(.*)$/.test(line)) {
-            const val = line.match(/^\s+-\s*(.*)$/)[1].trim()
-            if (lastKey && Array.isArray(result[lastKey])) {
-                if (val !== '') result[lastKey].push(castValue(val))
-            }
-            i++
-            continue
-        }
-
-        // Par clave: valor
-        const colonIdx = line.indexOf(':')
-        if (colonIdx === -1) { i++; continue }
-
-        const key = line.slice(0, colonIdx).trim()
-        const raw = line.slice(colonIdx + 1).trim()
-        lastKey   = key
-
-        if (raw === '' || raw === null) {
-            result[key] = []  // inicio de lista
-        } else {
-            // Quitar comillas
-            const clean = raw.replace(/^["']|["']$/g, '')
-            result[key] = castValue(clean)
-        }
-
-        i++
+    // Item de lista: "  - valor"
+    if (/^\s+-\s*(.*)$/.test(line)) {
+      const val = line.match(/^\s+-\s*(.*)$/)[1].trim();
+      if (lastKey && Array.isArray(result[lastKey])) {
+        if (val !== "") result[lastKey].push(castValue(val));
+      }
+      i++;
+      continue;
     }
 
-    return result
+    // Par clave: valor
+    const colonIdx = line.indexOf(":");
+    if (colonIdx === -1) {
+      i++;
+      continue;
+    }
+
+    const key = line.slice(0, colonIdx).trim();
+    const raw = line.slice(colonIdx + 1).trim();
+    lastKey = key;
+
+    if (raw === "" || raw === null) {
+      result[key] = []; // inicio de lista
+    } else {
+      // Quitar comillas
+      const clean = raw.replace(/^["']|["']$/g, "");
+      result[key] = castValue(clean);
+    }
+
+    i++;
+  }
+
+  return result;
 }
 
 function castValue(val) {
-    if (val === 'true')  return true
-    if (val === 'false') return false
-    const n = Number(val)
-    if (!isNaN(n) && val !== '') return n
-    return val
+  if (val === "true") return true;
+  if (val === "false") return false;
+  const n = Number(val);
+  if (!isNaN(n) && val !== "") return n;
+  return val;
 }
 
 // Devuelve { yaml, bodyLines[] } — bodyLines es el texto después del segundo ---
 function splitFrontmatter(content) {
-    const lines = content.split('\n')
-    if (lines[0].trim() !== '---') return { yaml: {}, bodyLines: lines }
+  const lines = content.split("\n");
+  if (lines[0].trim() !== "---") return { yaml: {}, bodyLines: lines };
 
-    let end = 1
-    while (end < lines.length && lines[end].trim() !== '---') end++
+  let end = 1;
+  while (end < lines.length && lines[end].trim() !== "---") end++;
 
-    return {
-        yaml:      parseYAML(content),
-        bodyLines: lines.slice(end + 1),
-    }
+  return {
+    yaml: parseYAML(content),
+    bodyLines: lines.slice(end + 1),
+  };
 }
 
 // ── Task extractor ────────────────────────────────────────────
 // Agrupa checkboxes markdown por sección `##`.
 // Subsecciones `###` se tratan como tareas planas bajo la sección padre.
 function extractTasks(bodyLines) {
-    const sections  = []
-    let current     = null
-    const TASK_RE   = /^- \[([ xX])\] (.+)$/
-    const H2_RE     = /^## (.+)$/
-    const H3_RE     = /^### (.+)$/
+  const sections = [];
+  let current = null;
+  const TASK_RE = /^- \[([ xX])\] (.+)$/;
+  const H2_RE = /^## (.+)$/;
+  const H3_RE = /^### (.+)$/;
 
-    for (const line of bodyLines) {
-        const h2 = line.match(H2_RE)
-        if (h2) {
-            if (current && current.tasks.length > 0) sections.push(current)
-            current = { title: h2[1].trim(), tasks: [] }
-            continue
-        }
-
-        // H3 no crea nueva sección, solo es un subtítulo visual — lo ignoramos
-        if (H3_RE.test(line)) continue
-
-        const task = line.match(TASK_RE)
-        if (task && current) {
-            current.tasks.push({
-                checked: task[1].toLowerCase() === 'x',
-                text:    task[2].trim(),
-            })
-        }
+  for (const line of bodyLines) {
+    const h2 = line.match(H2_RE);
+    if (h2) {
+      if (current && current.tasks.length > 0) sections.push(current);
+      current = { title: h2[1].trim(), tasks: [] };
+      continue;
     }
 
-    if (current && current.tasks.length > 0) sections.push(current)
-    return sections
+    // H3 no crea nueva sección, solo es un subtítulo visual — lo ignoramos
+    if (H3_RE.test(line)) continue;
+
+    const task = line.match(TASK_RE);
+    if (task && current) {
+      current.tasks.push({
+        checked: task[1].toLowerCase() === "x",
+        text: task[2].trim(),
+      });
+    }
+  }
+
+  if (current && current.tasks.length > 0) sections.push(current);
+  return sections;
 }
 
 // ── Helpers de fecha ──────────────────────────────────────────
 function todayISO() {
-    const d = new Date()
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${y}-${m}-${day}`
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function currentMonth() {
-    const d = new Date()
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    return `${y}-${m}`
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
 }
 
 // ── Helpers de tiempo ─────────────────────────────────────────
 // Parsea "11:00 AM" / "2:15 AM" → minutos desde medianoche
 // bedtime con h < 6 → siguiente día (+1440)
 function parseTimeMinutes(str, nextDayIfEarly = false) {
-    if (!str) return null
-    const m = String(str).match(/(\d+):(\d+)\s*(AM|PM)/i)
-    if (!m) return null
-    let h = parseInt(m[1])
-    const min = parseInt(m[2])
-    const period = m[3].toUpperCase()
-    if (period === 'PM' && h !== 12) h += 12
-    if (period === 'AM' && h === 12) h = 0
-    const total = h * 60 + min
-    return (nextDayIfEarly && h < 6) ? total + 1440 : total
+  if (!str) return null;
+  const m = String(str).match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!m) return null;
+  let h = parseInt(m[1]);
+  const min = parseInt(m[2]);
+  const period = m[3].toUpperCase();
+  if (period === "PM" && h !== 12) h += 12;
+  if (period === "AM" && h === 12) h = 0;
+  const total = h * 60 + min;
+  return nextDayIfEarly && h < 6 ? total + 1440 : total;
 }
 
 // Mediana de un array de números
 function median(arr) {
-    if (!arr.length) return null
-    const s = [...arr].sort((a, b) => a - b)
-    const mid = Math.floor(s.length / 2)
-    return s.length % 2 !== 0 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2)
+  if (!arr.length) return null;
+  const s = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 !== 0 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2);
 }
 
 // ── Rutas ─────────────────────────────────────────────────────
 
 async function handleStats() {
-    const FIELDS         = ['mood', 'energy', 'focus', 'stress', 'exercise']
-    const MAX_VALUES     = { mood: 5, energy: 5, focus: 5, stress: 5, exercise: 1 }
-    const IDEAL_BED_MINS = 1440  // midnight
-    const BED_MAX_DEV    = 180   // 3h tolerance window
+  const FIELDS = ["mood", "energy", "focus", "stress", "exercise"];
+  const MAX_VALUES = { mood: 5, energy: 5, focus: 5, stress: 5, exercise: 5 };
+  const IDEAL_BED_MINS = 1380; // 11:00 PM
+  const BED_MAX_DEV = 180; // 3h tolerance window
 
-    const all  = await fs.readdir(JOURNAL_DIR)
-    const files = all
-        .filter(f => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
-        .sort()
-        .slice(-7)
+  const all = await fs.readdir(JOURNAL_DIR);
+  const files = all
+    .filter((f) => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
+    .sort()
+    .slice(-7);
 
-    const sums           = {}
-    const counts         = {}
-    const wakeMinutes    = []
-    const bedMinutes     = []
-    const sleepDayScores = []
+  const sums = {};
+  const counts = {};
+  const wakeMinutes = [];
+  const bedMinutes = [];
+  const sleepDayScores = [];
 
-    for (const file of files) {
-        const content  = await fs.readFile(path.join(JOURNAL_DIR, file), 'utf8')
-        const { yaml } = splitFrontmatter(content)
-        for (const field of FIELDS) {
-            if (typeof yaml[field] === 'number') {
-                sums[field]   = (sums[field]   || 0) + yaml[field]
-                counts[field] = (counts[field] || 0) + 1
-            }
-        }
-        const wMins = parseTimeMinutes(yaml.wake_up, false)
-        const bMins = parseTimeMinutes(yaml.bedtime, true)
-        if (wMins !== null) wakeMinutes.push(wMins)
-        if (bMins !== null) bedMinutes.push(bMins)
-        if (wMins !== null && bMins !== null) {
-            const hours       = (wMins + 1440 - bMins) / 60
-            const durScore    = Math.min(hours / 8, 1)
-            const timePenalty = Math.max(0, bMins - IDEAL_BED_MINS) / BED_MAX_DEV
-            const timeScore   = Math.max(0, 1 - timePenalty)
-            sleepDayScores.push(0.6 * durScore + 0.4 * timeScore)
-        }
-    }
-
-    const averages = {}
+  for (const file of files) {
+    const content = await fs.readFile(path.join(JOURNAL_DIR, file), "utf8");
+    const { yaml } = splitFrontmatter(content);
     for (const field of FIELDS) {
-        averages[field] = counts[field]
-            ? Math.round((sums[field] / counts[field]) * 10) / 10
-            : null
+      if (typeof yaml[field] === "number") {
+        sums[field] = (sums[field] || 0) + yaml[field];
+        counts[field] = (counts[field] || 0) + 1;
+      }
     }
-
-    if (sleepDayScores.length > 0) {
-        const avg = sleepDayScores.reduce((a, b) => a + b, 0) / sleepDayScores.length
-        averages.sleep_hours = Math.round(avg * 1000) / 10  // 0–100 with 1 decimal
+    const wMins = parseTimeMinutes(yaml.wake_up, false);
+    const bMins = parseTimeMinutes(yaml.bedtime, true);
+    if (wMins !== null) wakeMinutes.push(wMins);
+    if (bMins !== null) bedMinutes.push(bMins);
+    if (wMins !== null && bMins !== null) {
+      const hours = (wMins + 1440 - bMins) / 60;
+      const durScore = Math.min(hours / 8, 1);
+      const timePenalty = Math.max(0, bMins - IDEAL_BED_MINS) / BED_MAX_DEV;
+      const timeScore = Math.max(0, 1 - timePenalty);
+      sleepDayScores.push(0.6 * durScore + 0.4 * timeScore);
     }
+  }
 
-    const medWake = median(wakeMinutes)
-    const medBed  = median(bedMinutes)
+  const averages = {};
+  for (const field of FIELDS) {
+    averages[field] = counts[field]
+      ? Math.round((sums[field] / counts[field]) * 10) / 10
+      : null;
+  }
 
-    return {
-        days: files.length,
-        averages,
-        max: MAX_VALUES,
-        medianWakeUp:  medWake,
-        medianBedtime: medBed,
-        nudgeBedtime: medBed !== null
-            ? (medBed > IDEAL_BED_MINS ? medBed - 5 : IDEAL_BED_MINS)
-            : null,
-    }
+  if (sleepDayScores.length > 0) {
+    const avg =
+      sleepDayScores.reduce((a, b) => a + b, 0) / sleepDayScores.length;
+    averages.sleep_hours = Math.round(avg * 1000) / 10; // 0–100 with 1 decimal
+  }
+
+  const medWake = median(wakeMinutes);
+  const medBed = median(bedMinutes);
+
+  return {
+    days: files.length,
+    averages,
+    max: MAX_VALUES,
+    medianWakeUp: medWake,
+    medianBedtime: medBed,
+    nudgeBedtime:
+      medBed !== null
+        ? medBed > IDEAL_BED_MINS
+          ? medBed - 5
+          : IDEAL_BED_MINS
+        : null,
+  };
 }
 
 async function handleToday() {
-    const date     = todayISO()
-    const filePath = path.join(JOURNAL_DIR, `${date}.md`)
+  const date = todayISO();
+  const filePath = path.join(JOURNAL_DIR, `${date}.md`);
 
-    try {
-        await fs.access(filePath)
-    } catch {
-        return { found: false, date }
-    }
+  try {
+    await fs.access(filePath);
+  } catch {
+    return { found: false, date };
+  }
 
-    const content             = await fs.readFile(filePath, 'utf8')
-    const { yaml, bodyLines } = splitFrontmatter(content)
-    const sections            = extractTasks(bodyLines)
+  const content = await fs.readFile(filePath, "utf8");
+  const { yaml, bodyLines } = splitFrontmatter(content);
+  const sections = extractTasks(bodyLines);
 
-    return {
-        found:       true,
-        date,
-        day_of_week: yaml.day_of_week ?? null,
-        week_number: yaml.week_number ?? null,
-        wake_up:     yaml.wake_up || null,
-        sections,
-    }
+  return {
+    found: true,
+    date,
+    day_of_week: yaml.day_of_week ?? null,
+    week_number: yaml.week_number ?? null,
+    wake_up: yaml.wake_up || null,
+    sections,
+  };
 }
 
 async function handleFinances(month) {
-    month = month || currentMonth()
+  month = month || currentMonth();
 
-    let files
-    try {
-        const all = await fs.readdir(FINANCE_DIR)
-        files = all.filter(f => f.endsWith('.md') && f.startsWith(`${month}-`))
-    } catch {
-        files = []
+  let files;
+  try {
+    const all = await fs.readdir(FINANCE_DIR);
+    files = all.filter((f) => f.endsWith(".md") && f.startsWith(`${month}-`));
+  } catch {
+    files = [];
+  }
+
+  let income = 0;
+  let expenses = 0;
+  const byCategory = {};
+  const transactions = [];
+
+  for (const file of files) {
+    const content = await fs.readFile(path.join(FINANCE_DIR, file), "utf8");
+    const { yaml } = splitFrontmatter(content);
+
+    const amount = Number(yaml.amount) || 0;
+    const type = yaml.type;
+
+    if (type === "income") {
+      income += amount;
+    } else if (type === "expense") {
+      expenses += amount;
+      const cat = yaml.category || "other";
+      byCategory[cat] = (byCategory[cat] || 0) + amount;
     }
 
-    let income   = 0
-    let expenses = 0
-    const byCategory  = {}
-    const transactions = []
+    transactions.push({
+      title: yaml.title || file.replace(".md", ""),
+      type: type || "unknown",
+      amount,
+      date: yaml.date || "",
+      category: yaml.category || "",
+    });
+  }
 
-    for (const file of files) {
-        const content = await fs.readFile(path.join(FINANCE_DIR, file), 'utf8')
-        const { yaml } = splitFrontmatter(content)
+  // Ordenar transacciones por fecha descendente, tomar las últimas 5
+  transactions.sort((a, b) => b.date.localeCompare(a.date));
+  const recent = transactions.slice(0, 5);
 
-        const amount = Number(yaml.amount) || 0
-        const type   = yaml.type
-
-        if (type === 'income') {
-            income += amount
-        } else if (type === 'expense') {
-            expenses += amount
-            const cat = yaml.category || 'other'
-            byCategory[cat] = (byCategory[cat] || 0) + amount
-        }
-
-        transactions.push({
-            title:    yaml.title    || file.replace('.md', ''),
-            type:     type          || 'unknown',
-            amount,
-            date:     yaml.date     || '',
-            category: yaml.category || '',
-        })
-    }
-
-    // Ordenar transacciones por fecha descendente, tomar las últimas 5
-    transactions.sort((a, b) => b.date.localeCompare(a.date))
-    const recent = transactions.slice(0, 5)
-
-    return {
-        month,
-        currency:          'MXN',  // todas las transacciones del vault son MXN
-        income:            Math.round(income * 100) / 100,
-        expenses:          Math.round(expenses * 100) / 100,
-        balance:           Math.round((income - expenses) * 100) / 100,
-        transaction_count: transactions.length,
-        by_category:       byCategory,
-        transactions:      recent,
-    }
+  return {
+    month,
+    currency: "MXN", // todas las transacciones del vault son MXN
+    income: Math.round(income * 100) / 100,
+    expenses: Math.round(expenses * 100) / 100,
+    balance: Math.round((income - expenses) * 100) / 100,
+    transaction_count: transactions.length,
+    by_category: byCategory,
+    transactions: recent,
+  };
 }
 
 // ── Servidor HTTP ─────────────────────────────────────────────
 const CORS_HEADERS = {
-    'Access-Control-Allow-Origin':  '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Content-Type':                 'application/json; charset=utf-8',
-    'Cache-Control':                'no-cache',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-cache",
+};
 
 const server = http.createServer(async (req, res) => {
-    const url = new URL(req.url, `http://localhost:${PORT}`)
+  const url = new URL(req.url, `http://localhost:${PORT}`);
 
-    // Preflight CORS
-    if (req.method === 'OPTIONS') {
-        res.writeHead(204, CORS_HEADERS)
-        res.end()
-        return
+  // Preflight CORS
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, CORS_HEADERS);
+    res.end();
+    return;
+  }
+
+  const send = (status, data) => {
+    res.writeHead(status, CORS_HEADERS);
+    res.end(JSON.stringify(data));
+  };
+
+  try {
+    if (url.pathname === "/api/today") {
+      const data = await handleToday();
+      send(200, data);
+      return;
     }
 
-    const send = (status, data) => {
-        res.writeHead(status, CORS_HEADERS)
-        res.end(JSON.stringify(data))
+    if (url.pathname === "/api/stats") {
+      const data = await handleStats();
+      send(200, data);
+      return;
     }
 
-    try {
-        if (url.pathname === '/api/today') {
-            const data = await handleToday()
-            send(200, data)
-            return
-        }
-
-        if (url.pathname === '/api/stats') {
-            const data = await handleStats()
-            send(200, data)
-            return
-        }
-
-        if (url.pathname === '/api/finances') {
-            const month = url.searchParams.get('month') || undefined
-            const data  = await handleFinances(month)
-            send(200, data)
-            return
-        }
-
-        send(404, { error: 'not found' })
-    } catch (err) {
-        console.error('[server error]', err)
-        send(500, { error: err.message })
+    if (url.pathname === "/api/finances") {
+      const month = url.searchParams.get("month") || undefined;
+      const data = await handleFinances(month);
+      send(200, data);
+      return;
     }
-})
 
-server.listen(PORT, '127.0.0.1', () => {
-    console.log(`Obsidian API server corriendo en http://127.0.0.1:${PORT}`)
-    console.log(`  GET /api/today`)
-    console.log(`  GET /api/finances?month=YYYY-MM`)
-})
+    send(404, { error: "not found" });
+  } catch (err) {
+    console.error("[server error]", err);
+    send(500, { error: err.message });
+  }
+});
+
+server.listen(PORT, "127.0.0.1", () => {
+  console.log(`Obsidian API server corriendo en http://127.0.0.1:${PORT}`);
+  console.log(`  GET /api/today`);
+  console.log(`  GET /api/finances?month=YYYY-MM`);
+});

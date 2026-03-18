@@ -219,34 +219,51 @@ function renderFinances(data) {
 function renderLifeWeeks() {
     const BIRTH       = new Date('2002-04-04')
     const TOTAL_YEARS = 90
-    const TOTAL_WEEKS = TOTAL_YEARS * 52
+    const COLS        = 52
+    const CELL        = 10
+    const GAP         = 2
+    const STEP        = CELL + GAP
     const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000
     const now         = new Date()
 
-    // Año de vida actual (0-indexed), alineado al cumpleaños
     let yearOfLife = now.getFullYear() - BIRTH.getFullYear()
     const birthdayThisYear = new Date(now.getFullYear(), BIRTH.getMonth(), BIRTH.getDate())
     if (now < birthdayThisYear) yearOfLife--
 
-    // Semana dentro del año actual (0-indexed)
     const yearStart  = new Date(BIRTH.getFullYear() + yearOfLife, BIRTH.getMonth(), BIRTH.getDate())
     const weekInYear = Math.floor((now - yearStart) / MS_PER_WEEK)
+    const currentCell = yearOfLife * COLS + weekInYear
 
-    const currentCell = yearOfLife * 52 + weekInYear
+    const W = COLS * CELL + (COLS - 1) * GAP
+    const H = TOTAL_YEARS * CELL + (TOTAL_YEARS - 1) * GAP
+    const TOTAL_WEEKS = TOTAL_YEARS * COLS
 
-    const grid = document.getElementById('weeks-grid')
-    if (!grid) return
+    const container = document.getElementById('weeks-grid')
+    if (!container) return
 
-    const frag = document.createDocumentFragment()
+    const ns  = 'http://www.w3.org/2000/svg'
+    const svg = document.createElementNS(ns, 'svg')
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`)
+    svg.setAttribute('preserveAspectRatio', 'xMinYMin meet')
+    svg.setAttribute('width', '100%')
+    svg.setAttribute('height', '100%')
+
     for (let i = 0; i < TOTAL_WEEKS; i++) {
-        const cell = document.createElement('div')
-        cell.className = 'week-cell'
-        if (i < currentCell)        cell.classList.add('past')
-        else if (i === currentCell) cell.classList.add('current')
-        frag.appendChild(cell)
+        const col  = i % COLS
+        const row  = Math.floor(i / COLS)
+        const rect = document.createElementNS(ns, 'rect')
+        rect.setAttribute('x', col * STEP)
+        rect.setAttribute('y', row * STEP)
+        rect.setAttribute('width', CELL)
+        rect.setAttribute('height', CELL)
+        rect.setAttribute('rx', 1)
+        if (i < currentCell)        rect.setAttribute('class', 'past')
+        else if (i === currentCell) rect.setAttribute('class', 'current')
+        svg.appendChild(rect)
     }
-    grid.innerHTML = ''
-    grid.appendChild(frag)
+
+    container.innerHTML = ''
+    container.appendChild(svg)
 }
 
 renderLifeWeeks()
@@ -340,8 +357,8 @@ function renderStats(data) {
         const max   = data.max?.[field]
         if (avg == null || !max) return
         const pct = Math.min(100, Math.round((avg / max) * 100))
-        pill.querySelector('.stat-pill-fill').style.setProperty('--fill', pct + '%')
-        pill.querySelector('.stat-pill-pct').textContent = pct + '%'
+        pill.querySelector('.pill-fill').style.setProperty('--fill', pct + '%')
+        pill.querySelector('.pill-pct').textContent = pct + '%'
     })
 }
 

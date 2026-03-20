@@ -305,6 +305,16 @@ function updateClock() {
   const m = String(now.getMinutes()).padStart(2, "0");
   document.getElementById("clock-time").textContent = `${h}:${m}`;
 
+  // Date
+  const dateEl = document.getElementById("clock-date");
+  if (dateEl) {
+    dateEl.textContent = now.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+  }
+
   // Day progress pill
   const fill = document.getElementById("clock-day-fill");
   const dayPct = document.getElementById("clock-day-pct");
@@ -403,7 +413,7 @@ function renderStats(data) {
 // ── Streaks ───────────────────────────────────────────────────
 const STREAK_CONFIG = [
   { field: "daily_commit", label: "Commit" },
-  { field: "algo_practice", label: "Algo" },
+  { field: "algo_practice", label: "Algorithm" },
   { field: "english_practice", label: "English" },
   { field: "reading", label: "Reading" },
 ];
@@ -417,19 +427,38 @@ function renderStreaks(data) {
   const panel = document.getElementById("streaks-panel");
   if (!panel) return;
 
-  const ns = "http://www.w3.org/2000/svg";
-  const CELL = 8;
-  const GAP = 1;
-  const STEP = CELL + GAP;
+  const firstItem = Object.values(data)[0];
+  const COLS = firstItem?.history.length || 15;
+  const today = new Date();
 
   const frag = document.createDocumentFragment();
 
+  // Grid columns: label col + N cell cols
+  panel.style.gridTemplateColumns = `auto repeat(${COLS}, 1fr)`;
+
+  // Header: empty label spacer + day-number cells
+  const spacer = document.createElement("div");
+  spacer.className = "streak-label-col";
+  frag.appendChild(spacer);
+
+  for (let i = 0; i < COLS; i++) {
+    const daysAgo = COLS - 1 - i;
+    const d = new Date(today);
+    d.setDate(d.getDate() - daysAgo);
+    const dayNum = d.getDate();
+    const cell = document.createElement("span");
+    cell.className = "streak-day-label";
+    if (dayNum % 5 === 0) cell.textContent = dayNum;
+    frag.appendChild(cell);
+  }
+
+  // Data rows — flat grid items (label-col + N cells per row)
   for (const { field, label } of STREAK_CONFIG) {
     const item = data[field];
     if (!item) continue;
 
-    const row = document.createElement("div");
-    row.className = "streak-row";
+    const labelCol = document.createElement("div");
+    labelCol.className = "streak-label-col";
 
     const nameEl = document.createElement("span");
     nameEl.className = "streak-name";
@@ -439,41 +468,21 @@ function renderStreaks(data) {
     countEl.className = "streak-count";
     countEl.textContent = item.streak;
 
-    const COLS = item.history.length;
-    const W = COLS * STEP - GAP;
-
-    const svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox", `0 0 ${W + 200} ${CELL}`);
-    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-    svg.classList.add("streak-svg");
+    labelCol.appendChild(nameEl);
+    labelCol.appendChild(countEl);
+    frag.appendChild(labelCol);
 
     const lastIdx = item.history.length - 1;
     item.history.forEach((val, colIdx) => {
-      const rect = document.createElementNS(ns, "rect");
-      rect.setAttribute("x", colIdx * STEP);
-      rect.setAttribute("y", 0);
-      rect.setAttribute("width", CELL);
-      rect.setAttribute("height", CELL);
-      rect.setAttribute("rx", 1);
+      const cell = document.createElement("span");
+      cell.className = "streak-cell";
       const isPendingToday = item.pending && colIdx === lastIdx;
-      if (isPendingToday) {
-        rect.setAttribute("fill", "#ea7d54");
-        rect.setAttribute("opacity", "0.25");
-      } else if (val === true) {
-        rect.setAttribute("fill", "#ea7d54");
-        rect.setAttribute("opacity", "0.85");
-      } else if (val === false) {
-        rect.setAttribute("fill", "rgba(245,239,213,0.1)");
-      } else {
-        rect.setAttribute("fill", "rgba(245,239,213,0.05)");
-      }
-      svg.appendChild(rect);
+      if (isPendingToday) cell.classList.add("streak-cell--pending");
+      else if (val === true) cell.classList.add("streak-cell--done");
+      else if (val === false) cell.classList.add("streak-cell--miss");
+      else cell.classList.add("streak-cell--empty");
+      frag.appendChild(cell);
     });
-
-    row.appendChild(nameEl);
-    row.appendChild(countEl);
-    row.appendChild(svg);
-    frag.appendChild(row);
   }
 
   panel.innerHTML = "";
@@ -682,7 +691,7 @@ function renderPomo() {
   dot.style.background =
     pomoPhase === "work" ? "var(--accent)" : "var(--blue-night)";
   const total = POMO_SECS[pomoPhase];
-  const pct = Math.round((1 - pomoLeft / total) * 100);
+  const pct = ((1 - pomoLeft / total) * 100).toFixed(2);
   const pomoColor =
     pomoPhase === "work" ? "var(--accent)" : "var(--blue-night)";
   clockFaceEl.style.setProperty("--pomo-fill", pct + "%");

@@ -539,19 +539,26 @@ async function handleFinances(month) {
 // ── Streaks ───────────────────────────────────────────────────
 async function handleStreaks() {
   const TRACKED = ['daily_commit', 'algo_practice', 'english_practice', 'reading']
-  const HISTORY_DAYS = 14
+  const HISTORY_DAYS = 22
 
+  // Build a date→yaml map for existing files
   const all = await fs.readdir(JOURNAL_DIR)
-  const files = all
-    .filter(f => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
-    .sort()
-    .slice(-HISTORY_DAYS)
-
-  const entries = []
-  for (const file of files) {
-    const content = await fs.readFile(path.join(JOURNAL_DIR, file), 'utf8')
+  const fileSet = {}
+  for (const f of all.filter(f => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))) {
+    const dateKey = f.slice(0, 10)
+    const content = await fs.readFile(path.join(JOURNAL_DIR, f), 'utf8')
     const { yaml } = splitFrontmatter(content)
-    entries.push(yaml)
+    fileSet[dateKey] = yaml
+  }
+
+  // Always produce exactly HISTORY_DAYS entries, oldest first, padding missing days with {}
+  const today = new Date()
+  const entries = []
+  for (let d = HISTORY_DAYS - 1; d >= 0; d--) {
+    const date = new Date(today)
+    date.setDate(date.getDate() - d)
+    const key = date.toISOString().slice(0, 10)
+    entries.push(fileSet[key] || {})
   }
 
   const result = {}

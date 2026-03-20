@@ -160,53 +160,88 @@ body::after {
 
 /* ── Stat pills (bottom-left) ──────────────────────────────── */
 .sci-stats-col {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing);
 }
 
 .sci-streaks {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  height: fit-content;
+  min-width: 0;
+  display: grid;
+  align-items: center;
+  align-content: center;
+  row-gap: 0.3rem;
+  column-gap: 3px;
   overflow: hidden;
+  padding: 1rem;
 }
 
-.streak-row {
+.streak-label-col {
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.3rem 0.6rem;
-  margin: 0.2rem 0;
-  background: var(--surface);
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-right: 0.6rem;
 }
 
 .streak-name {
-  font-size: 1rem;
+  padding-right: 3rem;
+  font-size: 0.75rem;
   opacity: 0.45;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  min-width: 4rem;
-  flex-shrink: 0;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .streak-count {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--accent);
-  min-width: 1.6rem;
-  text-align: right;
   line-height: 1;
-  flex-shrink: 0;
+  white-space: nowrap;
 }
 
-.streak-svg {
-  flex: 1;
-  display: block;
+.streak-cell {
+  aspect-ratio: 1;
+  width: 100%;
+  align-self: center;
+  border-radius: 1px;
+}
+
+.streak-day-label {
+  aspect-ratio: 1;
+  width: 100%;
+  align-self: center;
+  background: none !important;
+  font-size: 0.5rem;
+  opacity: 0.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.streak-cell--done {
+  background: #ea7d54;
+  opacity: 0.85;
+}
+
+.streak-cell--miss {
+  background: rgba(245, 239, 213, 0.12);
+}
+
+.streak-cell--empty {
+  background: rgba(245, 239, 213, 0.08);
+}
+
+.streak-cell--pending {
+  background: #ea7d54;
+  opacity: 0.25;
 }
 
 .sci-stats-bars {
-  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: stretch;
   gap: 0.5rem;
@@ -275,16 +310,16 @@ body::after {
   z-index: 1;
 }
 
-.clock-pills {
+.clock-pill {
   padding-left: 0.5rem;
-  flex: 0.5;
+  flex: 0 0 8.333%;
   display: flex;
   flex-direction: row;
   align-items: stretch;
   gap: 0.3rem;
 }
 
-.clock-pills .pill-fill {
+.clock-pill .pill-fill {
   transition-timing-function: linear;
 }
 
@@ -296,6 +331,13 @@ body::after {
   color: var(--text-color);
 }
 
+.clock-date {
+  font-size: min(7cqw, 9cqh);
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
 /* ── Pomodoro ────────────────────────────────────────────────── */
 .pomo-display {
   display: flex;
@@ -304,8 +346,8 @@ body::after {
 }
 
 .pomo-dot {
-  width: min(2cqw, 3cqh);
-  height: min(2cqw, 3cqh);
+  width: min(1.5cqw, 2.2cqh);
+  height: min(1.5cqw, 2.2cqh);
   border-radius: 50%;
   background: var(--accent);
   opacity: 0.3;
@@ -316,7 +358,7 @@ body::after {
 }
 
 .pomo-countdown {
-  font-size: min(11cqw, 17cqh);
+  font-size: min(8cqw, 12cqh);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -325,7 +367,7 @@ body::after {
 }
 
 .pomo-phase {
-  font-size: min(5cqw, 7cqh);
+  font-size: min(4cqw, 5.5cqh);
   opacity: 0.45;
   text-transform: uppercase;
   letter-spacing: 0.06em;

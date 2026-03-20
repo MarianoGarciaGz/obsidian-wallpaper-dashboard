@@ -1,0 +1,3 @@
+# Google OAuth credentials
+server/client_secret*.json
+server/token.json

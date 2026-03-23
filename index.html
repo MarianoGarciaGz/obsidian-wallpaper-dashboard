@@ -51,12 +51,22 @@
 
           <!-- Center: split in 2 -->
           <div class="sci-top-mid">
-            <div class="sci-card card-bg">
-              <h2 class="panel-title">
-                Tasks <span class="panel-status" id="tasks-date"></span>
-              </h2>
-              <div class="tasks-content" id="tasks-content">
-                <p class="loading-msg">Loading...</p>
+            <div class="sci-top-mid-left">
+              <div class="sci-card card-bg">
+                <h2 class="panel-title">
+                  Tasks <span class="panel-status" id="tasks-date"></span>
+                </h2>
+                <div class="tasks-content" id="tasks-content">
+                  <p class="loading-msg">Loading...</p>
+                </div>
+              </div>
+              <div class="sci-card card-bg" id="calendar-panel">
+                <h2 class="panel-title">
+                  Calendar <span class="panel-status" id="cal-status"></span>
+                </h2>
+                <div class="cal-content" id="cal-content">
+                  <p class="loading-msg">Loading...</p>
+                </div>
               </div>
             </div>
 
@@ -86,16 +96,13 @@
             <span class="btc-price" id="btc-price">—</span>
             <span class="btc-updated" id="btc-updated"></span>
           </div>
-          <div class="sci-card card-bg" id="calendar-panel">
-            <h2 class="panel-title">
-              Calendar <span class="panel-status" id="cal-status"></span>
-            </h2>
-            <div class="cal-content" id="cal-content">
-              <p class="loading-msg">Loading...</p>
-            </div>
-          </div>
           <div class="sci-stats-col">
-            <div class="sci-streaks card-bg" id="streaks-panel"></div>
+            <div class="sci-stats-left">
+              <div class="sci-streaks card-bg" id="streaks-panel"></div>
+              <div class="card-bg" id="stat-chart-panel">
+                <div class="stat-chart-wrap" id="stat-chart-wrap"></div>
+              </div>
+            </div>
             <div class="sci-stats-bars" id="stats-bars">
               <div class="stat-pill" data-field="exercise">
                 <div class="pill-track">

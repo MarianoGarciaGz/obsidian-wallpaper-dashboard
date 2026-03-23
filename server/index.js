@@ -557,7 +557,7 @@ async function handleStreaks() {
   for (let d = HISTORY_DAYS - 1; d >= 0; d--) {
     const date = new Date(today)
     date.setDate(date.getDate() - d)
-    const key = date.toISOString().slice(0, 10)
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     entries.push(fileSet[key] || {})
   }
 
@@ -581,6 +581,93 @@ async function handleStreaks() {
   }
 
   return result
+}
+
+// ── Sleep Tracker ─────────────────────────────────────────────
+async function handleSleepTracker() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthStr = String(month + 1).padStart(2, '0');
+
+  const all = await fs.readdir(JOURNAL_DIR);
+  const days = [];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
+    const fileName = `${dateKey}.md`;
+
+    let bedtime = null;
+    let wakeUp = null;
+
+    if (all.includes(fileName)) {
+      const content = await fs.readFile(path.join(JOURNAL_DIR, fileName), 'utf8');
+      const { yaml } = splitFrontmatter(content);
+      if (yaml.bedtime) {
+        const cleaned = String(yaml.bedtime).replace(/[^0-9:APMapm ]/g, '').trim();
+        bedtime = parseTimeMinutes(cleaned, false);
+      }
+      if (yaml.wake_up) wakeUp = parseTimeMinutes(yaml.wake_up, false);
+    }
+
+    days.push({ day: d, date: dateKey, bedtime, wakeUp });
+  }
+
+  return { year, month: month + 1, daysInMonth, days };
+}
+
+// ── Stat History (monthly line chart) ─────────────────────────
+async function handleStatHistory() {
+  const FIELDS = ['exercise', 'energy', 'mood', 'stress', 'focus'];
+  const MAX_VALUES = { mood: 5, energy: 5, focus: 5, stress: 5, exercise: 5, sleep_score: 100 };
+  const IDEAL_BED_MINS = 1350;
+  const BED_MAX_DEV = 180;
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthStr = String(month + 1).padStart(2, '0');
+
+  const all = await fs.readdir(JOURNAL_DIR);
+
+  const fields = {};
+  for (const f of FIELDS) fields[f] = [];
+  fields.sleep_score = [];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
+    const fileName = `${dateKey}.md`;
+
+    let dayData = {};
+    if (all.includes(fileName)) {
+      const content = await fs.readFile(path.join(JOURNAL_DIR, fileName), 'utf8');
+      const { yaml } = splitFrontmatter(content);
+      dayData = yaml;
+    }
+
+    for (const f of FIELDS) {
+      fields[f].push(typeof dayData[f] === 'number' ? dayData[f] : null);
+    }
+
+    // sleep_score per day
+    const wMins = parseTimeMinutes(dayData.wake_up, false);
+    const bRaw = dayData.bedtime ? String(dayData.bedtime).replace(/[^0-9:APMapm ]/g, '').trim() : null;
+    const bMins = parseTimeMinutes(bRaw, true);
+
+    if (wMins !== null && bMins !== null) {
+      const hours = (wMins + 1440 - bMins) / 60;
+      const durScore = Math.min(hours / 8, 1);
+      const timePenalty = Math.max(0, bMins - IDEAL_BED_MINS) / BED_MAX_DEV;
+      const timeScore = Math.max(0, 1 - timePenalty);
+      fields.sleep_score.push(Math.round((0.6 * durScore + 0.4 * timeScore) * 100));
+    } else {
+      fields.sleep_score.push(null);
+    }
+  }
+
+  return { year, month: month + 1, daysInMonth, fields, max: MAX_VALUES };
 }
 
 // ── Servidor HTTP ─────────────────────────────────────────────
@@ -644,6 +731,18 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === "/api/streaks") {
       const data = await handleStreaks();
+      send(200, data);
+      return;
+    }
+
+    if (url.pathname === "/api/sleep-tracker") {
+      const data = await handleSleepTracker();
+      send(200, data);
+      return;
+    }
+
+    if (url.pathname === "/api/stat-history") {
+      const data = await handleStatHistory();
       send(200, data);
       return;
     }

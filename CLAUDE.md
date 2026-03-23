@@ -41,6 +41,8 @@ El servidor se lanza automáticamente al iniciar Windows via `server/start.vbs`,
 1. Matar el proceso: `taskkill /F /IM node.exe` en terminal (o Task Manager → node.exe → End Task)
 2. Relanzar: doble click en `server/start.vbs` o `wscript "...server\start.vbs"` en terminal
 
+**Importante:** Siempre que hagas cambios en el backend (`server/index.js`), debes reiniciar el servidor ejecutando ambos pasos anteriores para que los cambios surtan efecto.
+
 ## Estructura
 
 - `index.html` — markup del dashboard (3 columnas: tasks, tracker, panel derecho)

@@ -388,6 +388,162 @@ async function loadBTC() {
   }
 }
 
+// ── Stat Chart (monthly line) ─────────────────────────────────
+const STAT_CHART_CONFIG = {
+  exercise: { label: "Exercise", color: "var(--accent)", max: 5 },
+  energy: { label: "Energy", color: "#c4a45a", max: 5 },
+  mood: { label: "Mood", color: "var(--blue-night)", max: 5 },
+  stress: { label: "Stress", color: "var(--danger)", max: 5 },
+  focus: { label: "Focus", color: "var(--muted)", max: 5 },
+  sleep_score: { label: "Sleep Score", color: "#7b9dd4", max: 100 },
+};
+
+let statHistoryData = null;
+let activeStatField = "mood";
+
+async function loadStatHistory() {
+  const data = await apiFetch("/api/stat-history");
+  if (data) {
+    statHistoryData = data;
+    renderStatChart();
+  }
+}
+
+function renderStatChart() {
+  const wrap = document.getElementById("stat-chart-wrap");
+  if (!wrap || !statHistoryData) return;
+
+  const config = STAT_CHART_CONFIG[activeStatField];
+
+  const values = statHistoryData.fields[activeStatField];
+  const days = statHistoryData.daysInMonth;
+  const maxVal = config.max;
+  const today = new Date().getDate();
+
+  // SVG dimensions from container
+  const rect = wrap.getBoundingClientRect();
+  const W = rect.width;
+  const H = rect.height;
+  if (W === 0 || H === 0) return;
+  const PAD_B = H * 0.1;
+  const plotW = W;
+  const plotH = H - PAD_B;
+
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+  // Resolve CSS variable colors
+  const tempEl = document.createElement("div");
+  tempEl.style.color = config.color;
+  document.body.appendChild(tempEl);
+  const resolvedColor = getComputedStyle(tempEl).color;
+  document.body.removeChild(tempEl);
+
+  // Y-axis grid lines
+  const ySteps = maxVal <= 5 ? maxVal : 5;
+  for (let i = 0; i <= ySteps; i++) {
+    const y = plotH - (i / ySteps) * plotH;
+
+    const line = document.createElementNS(ns, "line");
+    line.setAttribute("x1", 0);
+    line.setAttribute("x2", W);
+    line.setAttribute("y1", y);
+    line.setAttribute("y2", y);
+    line.setAttribute("stroke", "rgba(245,239,213,0.08)");
+    line.setAttribute("stroke-width", "0.5");
+    svg.appendChild(line);
+  }
+
+  // X-axis day labels
+  const fontSize = 16;
+  for (let d = 1; d <= days; d++) {
+    if (d % 5 === 0 || d === 1) {
+      const x = ((d - 1) / (days - 1)) * plotW;
+      const label = document.createElementNS(ns, "text");
+      label.setAttribute("x", x);
+      label.setAttribute("y", H - fontSize * 0.3);
+      label.setAttribute("text-anchor", "middle");
+      label.style.cssText = `font-size:${fontSize}px;font-family:JetBrains Mono,monospace;fill:rgba(245,239,213,0.35)`;
+      label.textContent = d;
+      svg.appendChild(label);
+    }
+  }
+
+  // Build points for the line (skip nulls)
+  const points = [];
+  for (let d = 0; d < days; d++) {
+    if (values[d] == null || d + 1 > today) continue;
+    const x = (d / (days - 1)) * plotW;
+    const y = plotH - (values[d] / maxVal) * plotH;
+    points.push({ x, y, val: values[d], day: d + 1 });
+  }
+
+  if (points.length > 1) {
+    // Area fill
+    const areaPath = document.createElementNS(ns, "path");
+    const baseY = plotH;
+    let areaD = `M${points[0].x},${baseY} L${points[0].x},${points[0].y}`;
+    for (let i = 1; i < points.length; i++)
+      areaD += ` L${points[i].x},${points[i].y}`;
+    areaD += ` L${points[points.length - 1].x},${baseY} Z`;
+    areaPath.setAttribute("d", areaD);
+    areaPath.setAttribute("fill", resolvedColor);
+    areaPath.setAttribute("opacity", "0.08");
+    svg.appendChild(areaPath);
+
+    // Line
+    const linePath = document.createElementNS(ns, "path");
+    let lineD = `M${points[0].x},${points[0].y}`;
+    for (let i = 1; i < points.length; i++)
+      lineD += ` L${points[i].x},${points[i].y}`;
+    linePath.setAttribute("d", lineD);
+    linePath.setAttribute("fill", "none");
+    linePath.setAttribute("stroke", resolvedColor);
+    linePath.setAttribute("stroke-width", Math.max(1, W * 0.003));
+    linePath.setAttribute("stroke-linejoin", "round");
+    linePath.setAttribute("stroke-linecap", "round");
+    svg.appendChild(linePath);
+  }
+
+  // Dots
+  for (const pt of points) {
+    const circle = document.createElementNS(ns, "circle");
+    circle.setAttribute("cx", pt.x);
+    circle.setAttribute("cy", pt.y);
+    const dotR = Math.max(1.5, W * 0.004);
+    circle.setAttribute("r", pt.day === today ? dotR * 1.5 : dotR);
+    circle.setAttribute("fill", resolvedColor);
+    if (pt.day === today) circle.setAttribute("opacity", "1");
+    else circle.setAttribute("opacity", "0.6");
+    svg.appendChild(circle);
+  }
+
+  wrap.innerHTML = "";
+  wrap.appendChild(svg);
+}
+
+// Make stat pills clickable
+document.querySelectorAll(".stat-pill").forEach((pill) => {
+  pill.style.cursor = "pointer";
+  pill.addEventListener("click", () => {
+    const field = pill.dataset.field;
+    if (!field || !STAT_CHART_CONFIG[field]) return;
+    activeStatField = field;
+    // Update active class
+    document
+      .querySelectorAll(".stat-pill")
+      .forEach((p) => p.classList.remove("stat-pill--active"));
+    pill.classList.add("stat-pill--active");
+    renderStatChart();
+  });
+});
+
+// Set initial active pill
+const initialPill = document.querySelector('.stat-pill[data-field="mood"]');
+if (initialPill) initialPill.classList.add("stat-pill--active");
+
 // ── Stats pills ───────────────────────────────────────────────
 async function loadStats() {
   const data = await apiFetch("/api/stats");
@@ -616,6 +772,127 @@ function renderNextEvent() {
   barFillEl.classList.toggle("urgent", urgent);
 }
 
+// ── Sleep Tracker ─────────────────────────────────────────────
+async function loadSleepTracker() {
+  const data = await apiFetch("/api/sleep-tracker");
+  if (data) renderSleepTracker(data);
+}
+
+function getSleepCells(bedtime, wakeUp, hours) {
+  if (bedtime === null || wakeUp === null) return hours.map(() => false);
+  const bedNorm = bedtime < 18 * 60 ? bedtime + 1440 : bedtime;
+  const wakeNorm = wakeUp < 18 * 60 ? wakeUp + 1440 : wakeUp;
+  return hours.map((h) => {
+    const hNorm = h < 18 ? h + 24 : h;
+    const hStart = hNorm * 60;
+    const hEnd = (hNorm + 1) * 60;
+    return bedNorm < hEnd && wakeNorm > hStart;
+  });
+}
+
+function renderSleepTracker(data) {
+  const container = document.querySelector(".weeks-left");
+  if (!container) return;
+
+  const today = new Date().getDate();
+
+  // Compute dynamic hour range from actual sleep data
+  let minBedNorm = Infinity;
+  let maxWakeNorm = -Infinity;
+
+  for (const day of data.days) {
+    if (day.bedtime !== null && day.wakeUp !== null) {
+      const bedNorm = day.bedtime < 18 * 60 ? day.bedtime + 1440 : day.bedtime;
+      const wakeNorm = day.wakeUp < 18 * 60 ? day.wakeUp + 1440 : day.wakeUp;
+      if (bedNorm < minBedNorm) minBedNorm = bedNorm;
+      if (wakeNorm > maxWakeNorm) maxWakeNorm = wakeNorm;
+    }
+  }
+
+  // Fallback if no data yet
+  if (minBedNorm === Infinity) {
+    minBedNorm = 1440;
+    maxWakeNorm = 1920;
+  }
+
+  // Build hours array with 1h padding on each side
+  const startH = Math.floor(minBedNorm / 60) - 1;
+  const endH = Math.floor(maxWakeNorm / 60) + 1;
+  const sleepHours = [];
+  for (let h = startH; h <= endH; h++) {
+    sleepHours.push(((h % 24) + 24) % 24);
+  }
+
+  const MONTHS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const DAY_NAMES = ["S", "M", "T", "W", "T", "F", "S"];
+
+  const frag = document.createDocumentFragment();
+
+  const title = document.createElement("h2");
+  title.className = "panel-title";
+  title.textContent = "Sleep ";
+  const monthSpan = document.createElement("span");
+  monthSpan.className = "panel-status";
+  monthSpan.textContent = MONTHS[data.month - 1];
+  title.appendChild(monthSpan);
+  frag.appendChild(title);
+
+  const grid = document.createElement("div");
+  grid.className = "sleep-grid";
+  grid.style.gridTemplateColumns = `auto repeat(${sleepHours.length}, 1fr)`;
+  grid.style.gridTemplateRows = `auto repeat(${data.daysInMonth}, 1fr)`;
+
+  // Header row
+  const corner = document.createElement("span");
+  corner.className = "sleep-header";
+  grid.appendChild(corner);
+
+  for (const h of sleepHours) {
+    const hdr = document.createElement("span");
+    hdr.className = "sleep-header";
+    hdr.textContent = h;
+    grid.appendChild(hdr);
+  }
+
+  // Day rows
+  for (const day of data.days) {
+    const d = new Date(day.date + "T12:00:00");
+    const label = document.createElement("span");
+    label.className = "sleep-day-label";
+    label.textContent = `${DAY_NAMES[d.getDay()]} ${day.day}`;
+    if (day.day > today) label.style.opacity = "0.15";
+    grid.appendChild(label);
+
+    const sleeping = getSleepCells(day.bedtime, day.wakeUp, sleepHours);
+    for (let i = 0; i < sleepHours.length; i++) {
+      const cell = document.createElement("span");
+      cell.className = "sleep-cell";
+      if (day.day > today) cell.classList.add("sleep-cell--future");
+      else if (sleeping[i]) cell.classList.add("sleep-cell--filled");
+      else if (day.bedtime !== null) cell.classList.add("sleep-cell--empty");
+      else cell.classList.add("sleep-cell--nodata");
+      grid.appendChild(cell);
+    }
+  }
+
+  frag.appendChild(grid);
+  container.innerHTML = "";
+  container.appendChild(frag);
+}
+
 // ── Polling ───────────────────────────────────────────────────
 function refreshAll() {
   loadTasks();
@@ -623,6 +900,7 @@ function refreshAll() {
   loadStats();
   loadCalendar();
   loadStreaks();
+  loadSleepTracker();
 }
 
 refreshAll();
@@ -630,6 +908,8 @@ setInterval(refreshAll, REFRESH_MS);
 
 loadBTC();
 setInterval(loadBTC, BTC_REFRESH_MS);
+loadStatHistory();
+setInterval(loadStatHistory, REFRESH_MS);
 setInterval(renderNextEvent, 30_000);
 
 // ── Pomodoro ─────────────────────────────────────────────────

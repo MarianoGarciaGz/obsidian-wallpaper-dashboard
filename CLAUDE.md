@@ -43,9 +43,16 @@ El servidor se lanza automáticamente al iniciar Windows via `server/start.vbs`,
 
 **Importante:** Siempre que hagas cambios en el backend (`server/index.js`), debes reiniciar el servidor ejecutando ambos pasos anteriores para que los cambios surtan efecto.
 
+## Layout
+
+El dashboard es una grid de **3 columnas × 2 filas**. Las subdivisiones internas de cada celda pueden variar, pero la estructura base siempre debe mantener 3 cols y 2 rows.
+
+- **Top row** (`sci-top`): 3 columnas — Clock | Tasks+Calendar / Finances | Weeks
+- **Bottom row** (`sci-bottom`): 3 columnas — las celdas internas pueden cambiar pero siempre son 3 cols
+
 ## Estructura
 
-- `index.html` — markup del dashboard (3 columnas: tasks, tracker, panel derecho)
-- `styles.css` — todos los estilos; layout con CSS Grid `1fr 1fr 1fr`
+- `index.html` — markup del dashboard (3 columnas × 2 filas)
+- `styles.css` — todos los estilos; layout con CSS Grid
 - `script.js` — integración con la API de Wallpaper Engine
 - `project.json` — metadatos y propiedades configurables del wallpaper (tipo, título, user properties)

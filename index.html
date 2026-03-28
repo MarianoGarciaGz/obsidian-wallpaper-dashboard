@@ -89,14 +89,146 @@
           </div>
         </div>
 
-        <!-- Bottom row -->
+        <!-- Bottom row: 3 columns -->
         <div class="sci-bottom">
-          <div class="sci-card card-bg" id="btc-panel">
-            <span class="btc-label">BTC / USD</span>
-            <span class="btc-price" id="btc-price">—</span>
-            <span class="btc-updated" id="btc-updated"></span>
+          <div class="sci-bottom-left">
+            <div class="sci-card card-bg" id="cheatsheet-panel">
+              <h2 class="panel-title">Cheatsheet</h2>
+              <div class="cheatsheet-content">
+                <div class="cs-section">
+                  <span class="cs-heading">Navigation</span>
+                  <div class="cs-row">
+                    <span class="cs-cmd">..</span
+                    ><span class="cs-desc">parent dir</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">...</span
+                    ><span class="cs-desc">2 levels up</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">....</span
+                    ><span class="cs-desc">3 levels up</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">which</span
+                    ><span class="cs-desc">cmd source path</span>
+                  </div>
+                </div>
+                <div class="cs-section">
+                  <span class="cs-heading">Git</span>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gs</span
+                    ><span class="cs-desc">status</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gl</span
+                    ><span class="cs-desc">log --oneline --graph</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gd</span
+                    ><span class="cs-desc">diff</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gb</span
+                    ><span class="cs-desc">branch</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gp</span
+                    ><span class="cs-desc">push</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gpl</span
+                    ><span class="cs-desc">pull</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gco</span
+                    ><span class="cs-desc">checkout</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">gitmoji</span
+                    ><span class="cs-desc">emoji reference</span>
+                  </div>
+                </div>
+                <div class="cs-section">
+                  <span class="cs-heading">Node / npm</span>
+                  <div class="cs-row">
+                    <span class="cs-cmd">nr</span
+                    ><span class="cs-desc">npm run</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">ni</span
+                    ><span class="cs-desc">npm install</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">nid</span
+                    ><span class="cs-desc">npm install --save-dev</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">nrs</span
+                    ><span class="cs-desc">npm run start</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">nrd</span
+                    ><span class="cs-desc">npm run dev</span>
+                  </div>
+                </div>
+                <div class="cs-section">
+                  <span class="cs-heading">History</span>
+                  <div class="cs-row">
+                    <span class="cs-cmd">h / last</span
+                    ><span class="cs-desc">last 10 commands</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">↑ / ↓</span
+                    ><span class="cs-desc">search history</span>
+                  </div>
+                </div>
+                <div class="cs-section">
+                  <span class="cs-heading">Claude CLI</span>
+                  <div class="cs-row">
+                    <span class="cs-cmd">cskip</span
+                    ><span class="cs-desc">--dangerously-skip-permissions</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">ccont</span
+                    ><span class="cs-desc">--continue</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">crc</span
+                    ><span class="cs-desc">--remote-control + skip</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">haiku</span
+                    ><span class="cs-desc">haiku model</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">expense</span
+                    ><span class="cs-desc">record expense (Brain)</span>
+                  </div>
+                </div>
+                <div class="cs-section">
+                  <span class="cs-heading">Utils</span>
+                  <div class="cs-row">
+                    <span class="cs-cmd">touch</span
+                    ><span class="cs-desc">create file</span>
+                  </div>
+                  <div class="cs-row">
+                    <span class="cs-cmd">brain</span
+                    ><span class="cs-desc">obsidian + claude haiku</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="sci-card card-bg" id="btc-panel">
+                <span class="btc-label">BTC / USD</span>
+                <span class="btc-price" id="btc-price">—</span>
+                <span class="btc-updated" id="btc-updated"></span>
+              </div>
+            </div>
           </div>
-          <div class="sci-stats-col">
+          <div class="sci-bottom-mid"></div>
+          <div class="sci-bottom-right">
             <div class="sci-stats-left">
               <div class="sci-streaks card-bg" id="streaks-panel"></div>
               <div class="card-bg" id="stat-chart-panel">
@@ -114,7 +246,7 @@
               </div>
               <div class="stat-pill" data-field="energy">
                 <div class="pill-track">
-                  <div class="pill-fill" style="--c: #c4a45a"></div>
+                  <div class="pill-fill" style="--c: var(--accent)"></div>
                   <span class="pill-pct"></span>
                   <i class="pill-emoji bi bi-lightning-charge"></i>
                 </div>
@@ -122,7 +254,7 @@
               </div>
               <div class="stat-pill" data-field="mood">
                 <div class="pill-track">
-                  <div class="pill-fill" style="--c: var(--blue-night)"></div>
+                  <div class="pill-fill" style="--c: var(--accent)"></div>
                   <span class="pill-pct"></span>
                   <i class="pill-emoji bi bi-emoji-smile"></i>
                 </div>
@@ -130,7 +262,7 @@
               </div>
               <div class="stat-pill" data-field="stress">
                 <div class="pill-track">
-                  <div class="pill-fill" style="--c: var(--danger)"></div>
+                  <div class="pill-fill" style="--c: var(--accent)"></div>
                   <span class="pill-pct"></span>
                   <i class="pill-emoji bi bi-fire"></i>
                 </div>
@@ -140,7 +272,7 @@
                 <div class="pill-track">
                   <div
                     class="pill-fill"
-                    style="--c: rgba(245, 239, 213, 0.08)"
+                    style="--c: var(--accent)"
                   ></div>
                   <span class="pill-pct"></span>
                   <i class="pill-emoji bi bi-crosshair"></i>
@@ -149,7 +281,7 @@
               </div>
               <div class="stat-pill" data-field="sleep_score">
                 <div class="pill-track">
-                  <div class="pill-fill" style="--c: #7b9dd4"></div>
+                  <div class="pill-fill" style="--c: var(--accent)"></div>
                   <span class="pill-pct"></span>
                   <i class="pill-emoji bi bi-moon-stars"></i>
                 </div>

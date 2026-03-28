@@ -1,14 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
 
 :root {
-  --background-color: #18100c;
-  --text-color: #f5efd5;
-  --blue-night: #7371e6;
-  --accent: #ea7d54;
-  --muted: #a7927d;
-  --danger: #f15362;
+  --background-color: #202020;
+  --text-color: #fff;
+  --blue-night: #888888;
+  --accent: #ff6600;
+  --muted: #999;
+  --danger: #bbb;
   --spacing: 15px;
-  --surface: rgba(245, 239, 213, 0.08);
+  --surface: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -110,7 +110,7 @@ body::after {
 
 .sci-bottom {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: var(--spacing);
   flex: 1;
 }
@@ -165,8 +165,56 @@ body::after {
   color: var(--text-color);
 }
 
-/* ── Stat pills (bottom-left) ──────────────────────────────── */
-.sci-stats-col {
+.sci-bottom-left {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing);
+}
+
+/* ── Cheatsheet ─────────────────────────────────────────────── */
+#cheatsheet-panel {
+  overflow-y: auto;
+}
+
+.cheatsheet-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cs-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-heading {
+  font-size: 0.6rem;
+  opacity: 0.4;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.15rem;
+}
+
+.cs-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.05rem 0;
+  line-height: 1.3;
+}
+
+.cs-cmd {
+  font-size: 0.7rem;
+  color: var(--accent);
+  min-width: 4.5rem;
+  flex-shrink: 0;
+}
+
+.cs-desc {
+  font-size: 0.65rem;
+  opacity: 0.5;
+}
+
+.sci-bottom-right {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing);
@@ -230,20 +278,20 @@ body::after {
 }
 
 .streak-cell--done {
-  background: #ea7d54;
+  background: var(--accent);
   opacity: 0.85;
 }
 
 .streak-cell--miss {
-  background: rgba(245, 239, 213, 0.12);
+  background: var(--surface);
 }
 
 .streak-cell--empty {
-  background: rgba(245, 239, 213, 0.08);
+  background: var(--surface);
 }
 
 .streak-cell--pending {
-  background: #ea7d54;
+  background: var(--accent);
   opacity: 0.25;
 }
 
@@ -412,7 +460,7 @@ body::after {
 .next-event-bar-wrap {
   width: 80%;
   height: 1rem;
-  background: rgba(245, 239, 213, 0.1);
+  background: var(--surface);
   border-radius: 1rem;
   overflow: hidden;
 }
@@ -522,15 +570,17 @@ body::after {
 }
 
 .sleep-cell--empty {
-  background: rgba(245, 239, 213, 0.06);
+  background: var(--surface);
 }
 
 .sleep-cell--nodata {
-  background: rgba(245, 239, 213, 0.03);
+  background: var(--surface);
+  opacity: 0.4;
 }
 
 .sleep-cell--future {
-  background: rgba(245, 239, 213, 0.015);
+  background: var(--surface);
+  opacity: 0.2;
 }
 
 /* ── Panel titles ────────────────────────────────────────────── */
@@ -616,7 +666,6 @@ body::after {
   gap: 0.2rem;
 }
 
-
 .stat-chart-wrap {
   flex: 1;
   min-height: 0;
@@ -631,10 +680,9 @@ body::after {
   display: block;
 }
 
-
 /* ── Active pill indicator ──────────────────────────────────── */
 .stat-pill--active .pill-track {
-  outline: 1px solid rgba(245, 239, 213, 0.25);
+  outline: 1px solid var(--accent);
   outline-offset: 1px;
 }
 
@@ -673,7 +721,7 @@ body::after {
   justify-content: space-between;
   align-items: baseline;
   padding: 0.3rem 0;
-  border-bottom: 1px solid rgba(167, 146, 125, 0.2);
+  border-bottom: 1px solid var(--surface);
 }
 
 .finance-stat-label {
@@ -715,13 +763,13 @@ body::after {
 .cat-bar-track {
   flex: 1;
   height: 0.25rem;
-  background: rgba(167, 146, 125, 0.2);
+  background: var(--surface);
   border-radius: 0.15rem;
 }
 
 .cat-bar {
   height: 100%;
-  background: rgba(167, 146, 125, 0.6);
+  background: var(--muted);
   border-radius: 0.15rem;
 }
 
@@ -774,7 +822,7 @@ body::after {
   align-items: baseline;
   gap: 0.6rem;
   padding: 0.3rem 0;
-  border-bottom: 1px solid rgba(167, 146, 125, 0.12);
+  border-bottom: 1px solid var(--surface);
 }
 
 .cal-event:last-child {
